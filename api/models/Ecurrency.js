@@ -9,6 +9,25 @@ module.exports = {
 
   attributes: {
 
+    title: {
+      type: 'string',
+      required: true
+    },
+
+    buyCommission: {
+      type: 'json',
+      required: true
+    },
+
+    sellCommission: {
+      type: 'json',
+      required: true
+    },
+
+    exchangeCommission: {
+      type: 'json',
+      required: true
+    },
 
   },
 
