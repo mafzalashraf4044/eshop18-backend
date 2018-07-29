@@ -40,4 +40,6 @@ module.exports.routes = {
   ***************************************************************************/
 
 
+  'POST /register': 'UserController.registerUser',
+
 };
