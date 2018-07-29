@@ -50,5 +50,44 @@ module.exports = {
     return res.json(200, {user});
 
   },
-  
+
+  getUsers: async (req, res) => {
+    /**
+     * Params:
+    * - searchTerm
+    * - sortBy (ASC or DESC)
+    * - sortType
+    * - pageNum
+    * - pageSize
+    */
+
+    sails.log('UsersController::getUsers called');
+
+    const params = req.allParams();
+    
+    const criteria = {};
+    const fields = ['firstName', 'lastName', 'email', 'username', 'country', 'contactNumber'];
+
+    //  params validation
+    if (params.searchTerm) {
+      criteria.or = _.map(fields, (field) => ({[field]: {contains: params.searchTerm}}));
+    }
+
+    if ((params.pageNum && params.pageNum > 0) && (params.pageSize && params.pageSize > 0)) {
+      criteria.limit = params.pageSize;
+      criteria.skip = params.pageSize * (params.pageNum - 1);
+    }
+
+    if ((params.sortType === 'ASC' || params.sortType === 'DESC') && (params.sortBy && fields.indexOf(params.sortBy) !== -1)) {
+      criteria.sort = `${params.sortBy} ${params.sortType}`;
+    }
+
+    const users = await User.find(criteria)
+    .intercept((err) => {
+      return err;
+    });
+
+    return res.json(200, {users});
+
+  },
 };
