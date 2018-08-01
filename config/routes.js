@@ -40,7 +40,6 @@ module.exports.routes = {
   ***************************************************************************/
 
 
-  'POST /register': 'UserController.registerUser',
-  'GET /users': 'UserController.getUsers',
-
+  'GET /user': 'UserController.getUsers',
+  'POST /user': 'UserController.createUser',
 };

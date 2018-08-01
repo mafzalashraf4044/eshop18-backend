@@ -5,9 +5,53 @@
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
 
+const bcrypt = require('bcrypt');
+
 module.exports = {
 
-  registerUser: async (req, res) => {
+  getUsers: async (req, res) => {
+    /**
+    * Params:
+    * - searchTerm
+    * - sortBy (ASC or DESC)
+    * - sortType
+    * - pageNum
+    * - pageSize
+    */
+
+    sails.log('UsersController::getUsers called');
+
+    const params = req.allParams();
+    
+    const criteria = {isArchived: false};
+    const fields = ['firstName', 'lastName', 'email', 'username', 'country', 'contactNumber'];
+
+    //  search query
+    if (params.searchTerm) {
+      criteria.or = _.map(fields, (field) => ({[field]: {contains: params.searchTerm}}));
+    }
+
+    //  pagination
+    if ((params.pageNum && params.pageNum > 0) && (params.pageSize && params.pageSize > 0)) {
+      criteria.limit = params.pageSize;
+      criteria.skip = params.pageSize * (params.pageNum - 1);
+    }
+
+    //  sorting
+    if ((params.sortType === 'ASC' || params.sortType === 'DESC') && (params.sortBy && fields.indexOf(params.sortBy) !== -1)) {
+      criteria.sort = `${params.sortBy} ${params.sortType}`;
+    }
+
+    const users = await User.find(criteria)
+    .intercept((err) => {
+      return err;
+    });
+
+    return res.status(200).json({users});
+
+  },
+
+  createUser: async (req, res) => {
     /**
      * Params:
      * - firstName (req)
@@ -19,8 +63,9 @@ module.exports = {
      * - contactNumber (req)
     */
 
-    sails.log('UsersController::registerUser called');
+    sails.log('UsersController:: createUser called');
 
+    const saltRounds = 10;
     const params = req.allParams();
     
     /**
@@ -42,52 +87,11 @@ module.exports = {
 
     const user = await User.create(params)
     .intercept('E_UNIQUE', (err)=> {
-      return 'Email already exists.';
+      return 'Email or username already exists.';
     }).intercept((err) => {
       return err;
     }).fetch();
 
-    return res.json(200, {user});
-
-  },
-
-  getUsers: async (req, res) => {
-    /**
-     * Params:
-    * - searchTerm
-    * - sortBy (ASC or DESC)
-    * - sortType
-    * - pageNum
-    * - pageSize
-    */
-
-    sails.log('UsersController::getUsers called');
-
-    const params = req.allParams();
-    
-    const criteria = {};
-    const fields = ['firstName', 'lastName', 'email', 'username', 'country', 'contactNumber'];
-
-    //  params validation
-    if (params.searchTerm) {
-      criteria.or = _.map(fields, (field) => ({[field]: {contains: params.searchTerm}}));
-    }
-
-    if ((params.pageNum && params.pageNum > 0) && (params.pageSize && params.pageSize > 0)) {
-      criteria.limit = params.pageSize;
-      criteria.skip = params.pageSize * (params.pageNum - 1);
-    }
-
-    if ((params.sortType === 'ASC' || params.sortType === 'DESC') && (params.sortBy && fields.indexOf(params.sortBy) !== -1)) {
-      criteria.sort = `${params.sortBy} ${params.sortType}`;
-    }
-
-    const users = await User.find(criteria)
-    .intercept((err) => {
-      return err;
-    });
-
-    return res.json(200, {users});
-
+    return res.status(200).json({user});
   },
 };
