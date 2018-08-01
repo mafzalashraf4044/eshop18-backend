@@ -14,6 +14,10 @@ module.exports = {
       required: true
     },
 
+    isArchived: {
+      type: 'boolean',
+      defaultsTo: false
+    }
   },
 
 };

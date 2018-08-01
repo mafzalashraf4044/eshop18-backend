@@ -54,6 +54,11 @@ module.exports = {
       type: 'string',
       required: true,
     },
+
+    isArchived: {
+      type: 'boolean',
+      defaultsTo: false
+    }
   },
 
 };

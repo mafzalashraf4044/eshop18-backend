@@ -49,6 +49,10 @@ module.exports = {
       model: 'user'
     },
 
+    isArchived: {
+      type: 'boolean',
+      defaultsTo: false
+    }
   },
 
 };

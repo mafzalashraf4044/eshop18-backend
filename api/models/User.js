@@ -5,7 +5,22 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
+const bcrypt = require('bcrypt');
+
 module.exports = {
+
+  customToJSON: function() {
+    return _.omit(this, ['password']);
+  },
+
+  beforeCreate: async (user, proceed) => {
+    if (user.password) {
+      const passwordHash = await bcrypt.hash(user.password, 10);
+      user.password = passwordHash;
+    }
+
+    return proceed();
+  },
 
   attributes: {
 
@@ -21,6 +36,7 @@ module.exports = {
 
     username: {
       type: 'string',
+      unique: true,
     },
 
     email: {
@@ -64,6 +80,10 @@ module.exports = {
       defaultsTo: false,
     },
 
+    isArchived: {
+      type: 'boolean',
+      defaultsTo: false
+    }
   },
 
 };
