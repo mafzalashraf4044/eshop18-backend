@@ -141,4 +141,28 @@ module.exports = {
 
     return res.status(200).json({user: _.head(user)});
   },
+
+  deleteUser: async (req, res) => {
+    /**
+     * Params:
+     * - id (req, query param)
+    */
+
+    sails.log('UsersController:: deleteUser called');
+
+    const params = req.allParams();
+
+    const user = await User.update({id: params.id, isArchived: false}, {
+      isArchived: true,
+    }).intercept((err) => {
+      return err;
+    }).fetch();
+
+    if (!user) {
+      return res.status(404).json({msg: 'User does not exist.'});
+    } else {
+      return res.status(200).json({msg: 'User deleted successfully.'});
+    }
+    
+  },
 };
