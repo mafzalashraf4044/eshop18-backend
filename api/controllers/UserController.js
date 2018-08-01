@@ -94,4 +94,51 @@ module.exports = {
 
     return res.status(200).json({user});
   },
+
+  updateUser: async (req, res) => {
+    /**
+     * Params:
+     * - id (req, query param)
+     * - firstName (req)
+     * - lastName (req)
+     * - username
+     * - email (req)
+     * - country (req)
+     * - contactNumber (req)
+    */
+
+    sails.log('UsersController:: updateUser called');
+
+    const params = req.allParams();
+
+    if (params.password) {
+      return res.json(400, {msg: 'Invalid arguments provided.'});
+    }
+
+    //  Feilds Pattern Validation
+    if (params.firstName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.firstName)) {
+      return res.json(400, {msg: 'First name is invalid.'});
+    } else if (params.lastName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.lastName)) {
+      return res.json(400, {msg: 'Last name is invalid.'});
+    } else if (params.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email)) {
+      return res.json(400, {msg: 'Email is invalid.'});
+    } else if (params.username && !/^[a-zA-Z0-9][a-zA-Z0-9]+[a-zA-Z0-9]$/.test(params.username)) {
+      return res.json(400, {msg: 'Username is invalid.'});
+    }
+
+    const user = await User.update({id: params.id, isArchived: false}, {
+      firstName: params.firstName,
+      lastName: params.lastName,
+      username: params.username,
+      email: params.email,
+      country: params.country,
+      contactNumber: params.contactNumber,
+    }).intercept('E_UNIQUE', (err)=> {
+      return 'Email or username already exists.';
+    }).intercept((err) => {
+      return err;
+    }).fetch();
+
+    return res.status(200).json({user: _.head(user)});
+  },
 };

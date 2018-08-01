@@ -42,4 +42,5 @@ module.exports.routes = {
 
   'GET /user': 'UserController.getUsers',
   'POST /user': 'UserController.createUser',
+  'PATCH /user/:id': 'UserController.updateUser',
 };
