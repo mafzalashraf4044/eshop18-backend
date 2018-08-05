@@ -7,6 +7,133 @@
 
 module.exports = {
   
+  getAccounts: async (req, res) => {
+    /**
+    * Params:
+    * - searchTerm
+    * - sortBy (ASC or DESC)
+    * - sortType
+    * - pageNum
+    * - pageSize
+    */
+
+    sails.log('AccountController::getAccounts called');
+
+    const params = req.allParams();
+    
+    const criteria = {where: {isArchived: false}};
+    const fields = ['title', 'content'];
+
+    //  search query
+    if (params.searchTerm) {
+      criteria.or = _.map(fields, (field) => ({[field]: {contains: params.searchTerm}}));
+    }
+
+    //  pagination
+    if ((params.pageNum && params.pageNum > 0) && (params.pageSize && params.pageSize > 0)) {
+      criteria.limit = params.pageSize;
+      criteria.skip = params.pageSize * (params.pageNum - 1);
+    }
+
+    //  sorting
+    if ((params.sortType === 'ASC' || params.sortType === 'DESC') && (params.sortBy && fields.indexOf(params.sortBy) !== -1)) {
+      criteria.sort = `${params.sortBy} ${params.sortType}`;
+    }
+
+    const accounts = await Account.find(criteria)
+    .intercept((err) => {
+      return err;
+    });
+
+    return res.status(200).json({accounts});
+
+  },
+
+  createAccount: async (req, res) => {
+    /**
+     * Params:
+     * - accountName (req)
+     * - accountNum (req)
+     * - accountType (req)
+     * - paymentMethod
+     * - eCurrency
+     * - bankName
+     * - bankAddress
+     * - bankSwiftCode
+     * - owner (req)
+    */
+
+    sails.log('AccountController:: createAccount called');
+
+    const params = req.allParams();
+
+    const account = await Account.create(params)
+    .intercept((err) => {
+      return err;
+    }).fetch();
+
+    return res.status(200).json({account});
+  },
+
+  updateAccount: async (req, res) => {
+    /**
+     * Params:
+     * - id (req, query param)
+     * - accountName (req)
+     * - accountNum (req)
+     * - accountType (req)
+     * - paymentMethod
+     * - eCurrency
+     * - bankName
+     * - bankAddress
+     * - bankSwiftCode
+     * - owner (req)
+    */
+
+    sails.log('AccountController:: updateAccount called');
+
+    const params = req.allParams();
+
+    const account = await Account.update({id: params.id, isArchived: false}, {
+      accountName: params.accountName,
+      accountNum: params.accountNum,
+      accountType: params.accountType,
+      paymentMethod: params.paymentMethod,
+      eCurrency: params.eCurrency,
+      bankName: params.bankName,
+      bankAddress: params.bankAddress,
+      bankSwiftCode: params.bankSwiftCode,
+      owner: params.owner,
+    }).intercept((err) => {
+      return err;
+    }).fetch();
+
+    return res.status(200).json({user: _.head(account)});
+  },
+
+  deleteAccount: async (req, res) => {
+    /**
+     * Params:
+     * - id (req, query param)
+    */
+
+    sails.log('AccountController:: deleteAccount called');
+
+    const params = req.allParams();
+
+    const account = await Account.update({id: params.id, isArchived: false}, {
+      isArchived: true,
+    }).intercept((err) => {
+      return err;
+    }).fetch();
+
+    if (!account) {
+      return res.status(404).json({msg: 'Account does not exist.'});
+    } else {
+      return res.status(200).json({msg: 'Account deleted successfully.'});
+    }
+    
+  },
 
 };
 
