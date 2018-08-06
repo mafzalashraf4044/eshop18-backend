@@ -35,7 +35,8 @@ module.exports = {
     },
 
     user: {
-      model: 'user'
+      model: 'user',
+      required: true,
     },
 
     type: {
@@ -47,12 +48,12 @@ module.exports = {
     status: {
       type: 'string',
       isIn: ['completed', 'pending', 'cancelled', 'rejected'],
-      required: true,
+      defaultsTo: 'pending',
     },
 
     action: {
       type: 'string',
-      required: true,
+      allowNull: true,
     },
 
     isArchived: {
