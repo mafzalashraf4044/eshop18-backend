@@ -15,6 +15,7 @@ module.exports = {
     passport.authenticate('local', {
       session: false
     }, (err, user, message) => {
+
       if (err || !user) {
         return res.status(400).json({ message, user });
       }
@@ -26,16 +27,15 @@ module.exports = {
           res.send(err);
         }
         // generate a signed json web token with the contents of user object and return it in the response
-        const token = jwt.sign(user, 'your_jwt_secret');
+        const token = jwt.sign(user, 'your_jwt_secret', { expiresIn: '7d' });
         return res.status(200).json({ user, token });
       });
     })(req, res);
   },
 
-
   logout: function(req, res) {
     req.logout();
-    res.redirect('/');
+    res.status(200).json({ msg: 'Logout successful.' })
   },
 
   // login: async (req, res) => {

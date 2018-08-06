@@ -7,6 +7,7 @@ module.exports = (req, res, proceed) => {
     if (err || !user) {
       return res.forbidden();
     } else {
+      req.user = user;
       proceed();
     }
   })(req, res);
