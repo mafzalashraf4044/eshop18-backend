@@ -23,12 +23,12 @@ module.exports = {
 
     const params = req.allParams();
     
-    const criteria = {isArchived: false};
+    const criteria = {where: {isArchived: false}};
     const fields = ['firstName', 'lastName', 'email', 'username', 'country', 'contactNumber'];
 
     //  search query
     if (params.searchTerm) {
-      criteria.or = _.map(fields, (field) => ({[field]: {contains: params.searchTerm}}));
+      criteria.where.or = _.map(fields, (field) => ({[field]: {contains: params.searchTerm}}));
     }
 
     //  pagination
@@ -165,4 +165,31 @@ module.exports = {
     }
     
   },
+
+  updateVerfiedStatus: async (req, res) => {
+    /**
+     * Params:
+     * - isVerified (req)
+     */
+
+    sails.log('UsersController:: updateVerfiedStatus called');
+
+    const params = req.allParams();
+
+    if (_.isUndefined(params.isVerified)) {
+      return res.json(400, {
+        msg: 'Field isVerified is required.'
+      });
+    }
+
+    const user = await User.update({id: req.user.id}, {
+      isVerified: params.isVerified,
+    }).intercept((err) => {
+      return err;
+    }).fetch();
+
+    return res.status(200).json({user: _.head(user)});
+
+  },
+
 };
