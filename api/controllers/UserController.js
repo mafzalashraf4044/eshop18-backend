@@ -170,6 +170,7 @@ module.exports = {
     /**
      * Params:
      * - isVerified (req)
+     * - id (req, query param)
      */
 
     sails.log('UsersController:: updateVerfiedStatus called');
@@ -182,7 +183,7 @@ module.exports = {
       });
     }
 
-    const user = await User.update({id: req.user.id}, {
+    const user = await User.update({id: params.id}, {
       isVerified: params.isVerified,
     }).intercept((err) => {
       return err;
