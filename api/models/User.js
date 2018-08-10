@@ -80,6 +80,11 @@ module.exports = {
       defaultsTo: false,
     },
 
+    emailVerifyHash: {
+      type: 'string',
+      defaultsTo: '',
+    },
+
     isArchived: {
       type: 'boolean',
       defaultsTo: false
