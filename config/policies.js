@@ -20,7 +20,7 @@ module.exports.policies = {
  
  'login': true,
 
- '*': 'isAuthenticated',
+//  '*': 'isAuthenticated',
 //  'EcurrencyController': 'isAuthenticated',
 //  'NewsController': 'isAuthenticated',
 //  'OrderController': 'isAuthenticated',

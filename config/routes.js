@@ -47,6 +47,8 @@ module.exports.routes = {
   'PATCH /user/:id': 'UserController.updateUser',
   'DELETE /user/:id': 'UserController.deleteUser',
   'POST /update-verifed-status/:id': 'UserController.updateVerfiedStatus',
+  'POST /verify-email/:id': 'UserController.verifyEmail',
+  'POST /send-email-to-list': 'UserController.sendEmailToList',
   
   'GET /news': 'NewsController.getNews',
   'POST /news': 'NewsController.createNews',
