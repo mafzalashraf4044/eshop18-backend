@@ -11,20 +11,21 @@ module.exports = {
 
     title: {
       type: 'string',
-      required: true
+      required: true,
+      unique: true,
     },
 
-    buyCommission: {
+    buyCommissions: {
       type: 'json',
       required: true
     },
 
-    sellCommission: {
+    sellCommissions: {
       type: 'json',
       required: true
     },
 
-    exchangeCommission: {
+    exchangeCommissions: {
       type: 'json',
       required: true
     },
