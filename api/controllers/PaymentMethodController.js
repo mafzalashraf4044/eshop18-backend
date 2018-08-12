@@ -22,11 +22,11 @@ module.exports = {
     const params = req.allParams();
     
     const criteria = {where: {isArchived: false}};
-    const fields = ['title'];
+    const fields = ['_id', 'title'];
 
     //  search query
     if (params.searchTerm) {
-      criteria.or = _.map(fields, (field) => ({[field]: {contains: params.searchTerm}}));
+      criteria.where.or = _.map(fields, (field) => ({[field]: field === '_id' ? params.searchTerm : {contains: params.searchTerm}}));
     }
 
     //  pagination
@@ -64,6 +64,8 @@ module.exports = {
       return err;
     }).fetch();
 
+    await sails.helpers.updateEcurrenciesCommissions();
+
     return res.status(200).json({paymentMethod});
   },
 
@@ -84,6 +86,8 @@ module.exports = {
       return err;
     }).fetch();
 
+    await sails.helpers.updateEcurrenciesCommissions();
+
     return res.status(200).json({user: _.head(paymentMethod)});
   },
 
@@ -103,10 +107,12 @@ module.exports = {
       return err;
     }).fetch();
 
+    await sails.helpers.updateEcurrenciesCommissions();
+
     if (!paymentMethod) {
-      return res.status(404).json({msg: 'Payment method does not exist.'});
+      return res.status(404).json({details: 'Payment method does not exist.'});
     } else {
-      return res.status(200).json({msg: 'Payment method deleted successfully.'});
+      return res.status(200).json({details: 'Payment method deleted successfully.'});
     }
     
   },

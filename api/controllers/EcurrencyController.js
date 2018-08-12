@@ -22,11 +22,11 @@ module.exports = {
     const params = req.allParams();
     
     const criteria = {where: {isArchived: false}};
-    const fields = ['title'];
+    const fields = ['_id', 'title'];
 
     //  search query
     if (params.searchTerm) {
-      criteria.or = _.map(fields, (field) => ({[field]: {contains: params.searchTerm}}));
+      criteria.where.or = _.map(fields, (field) => ({[field]: field === '_id' ? params.searchTerm : {contains: params.searchTerm}}));
     }
 
     //  pagination
@@ -58,12 +58,14 @@ module.exports = {
 
     const params = req.allParams();
 
-    const eCurrency = await Ecurrency.create(params)
+    const _eCurrency = await Ecurrency.create(params)
     .intercept((err) => {
       return err;
     }).fetch();
 
-    return res.status(200).json({eCurrency});
+    await sails.helpers.updateEcurrenciesCommissions();
+    
+    return res.status(200).json({eCurrency: _eCurrency});
   },
 
   updateECurrency: async (req, res) => {
@@ -79,11 +81,16 @@ module.exports = {
 
     const eCurrency = await Ecurrency.update({id: params.id, isArchived: false}, {
       title: params.title,
+      buyCommissions: params.buyCommissions,
+      sellCommissions: params.sellCommissions,
+      exchangeCommissions: params.exchangeCommissions,
     }).intercept((err) => {
       return err;
     }).fetch();
 
-    return res.status(200).json({user: _.head(eCurrency)});
+    await sails.helpers.updateEcurrenciesCommissions();
+
+    return res.status(200).json({eCurrency: _.head(eCurrency)});
   },
 
   deleteECurrency: async (req, res) => {
@@ -102,10 +109,12 @@ module.exports = {
       return err;
     }).fetch();
 
+    await sails.helpers.updateEcurrenciesCommissions();
+
     if (!eCurrency) {
-      return res.status(404).json({msg: 'E-Currency does not exist.'});
+      return res.status(404).json({details: 'E-Currency does not exist.'});
     } else {
-      return res.status(200).json({msg: 'E-Currency deleted successfully.'});
+      return res.status(200).json({details: 'E-Currency deleted successfully.'});
     }
     
   },
