@@ -16,23 +16,30 @@ module.exports = {
     * - pageNum
     * - pageSize
     * - user
+    * - type
+    * - type
     */
 
     sails.log('OrderController::getOrders called');
 
     const params = req.allParams();
     
-    const criteria = {where: {isArchived: false}};
-    const fields = ['country', 'sentFrom', 'receivedIn', 'type', 'status'];
+    const criteria = {where: {isArchived: false, type: params.type}};
+    const fields = ['_id' ,'country', 'sentFrom', 'receivedIn', 'status'];
 
     //  search query
     if (params.searchTerm) {
-      criteria.or = _.map(fields, (field) => ({[field]: {contains: params.searchTerm}}));
+      criteria.where.or = _.map(fields, (field) => ({[field]: field === '_id' ? params.searchTerm : {contains: params.searchTerm}}));
     }
 
     //  user query
     if (params.user) {
-      criteria.where.user = params.user;
+      criteria.where.user = params.user.toString();
+    }
+
+    //  type query
+    if (params.type) {
+      criteria.where.type = params.type;
     }
 
     //  pagination
@@ -106,7 +113,7 @@ module.exports = {
       return err;
     }).fetch();
 
-    return res.status(200).json({user: _.head(order)});
+    return res.status(200).json({order: _.head(order)});
   },
 
   deleteOrder: async (req, res) => {
@@ -126,9 +133,9 @@ module.exports = {
     }).fetch();
 
     if (!order) {
-      return res.status(404).json({msg: 'Order does not exist.'});
+      return res.status(404).json({details: 'Order does not exist.'});
     } else {
-      return res.status(200).json({msg: 'Order deleted successfully.'});
+      return res.status(200).json({details: 'Order deleted successfully.'});
     }
     
   },
