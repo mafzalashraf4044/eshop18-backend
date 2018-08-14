@@ -140,5 +140,29 @@ module.exports = {
     
   },
 
+  updateOrderStatus: async (req, res) => {
+    /**
+     * Params:
+     * - id (req, query param)
+     * - status (req)
+    */
+
+    sails.log('OrderController:: updateOrderStatus called');
+
+    const params = req.allParams();
+
+    if (['completed', 'pending', 'cancelled', 'rejected'].indexOf(params.status) === -1) {
+      return res.status(400).json({details: 'Status field is invalid.'});
+    }
+
+    const order = await Order.update({id: params.id, isArchived: false}, {
+      status: params.status,
+    }).intercept((err) => {
+      return err;
+    }).fetch();
+
+    return res.status(200).json({order: _.head(order)});
+  },
+
 };
 
