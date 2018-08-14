@@ -294,4 +294,71 @@ module.exports = {
    return res.status(200).json({orders, accounts});
   },
 
+  registerUser: async (req, res) => {
+    /**
+     * Params:
+     * - firstName (req)
+     * - lastName (req)
+     * - username
+     * - email (req)
+     * - password (req)
+     * - country (req)
+     * - contactNumber (req)
+    */
+
+    sails.log('UsersController:: registerUser called');
+
+    const saltRounds = 10;
+    const params = req.allParams();
+    
+    /**
+     * Email field is unique for each user, user will be created
+     * only if no existing user has the same email address
+     * 
+     */
+
+    //  Feilds Pattern Validation
+    if (params.firstName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.firstName)) {
+      return res.json(400, {details: 'First name is invalid.'});
+    } else if (params.lastName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.lastName)) {
+      return res.json(400, {details: 'Last name is invalid.'});
+    } else if (params.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email)) {
+      return res.json(400, {details: 'Email is invalid.'});
+    } else if (params.username && !/^[a-zA-Z0-9][a-zA-Z0-9]+[a-zA-Z0-9]$/.test(params.username)) {
+      return res.json(400, {details: 'Username is invalid.'});
+    }
+
+    const current_date = (new Date()).valueOf().toString();
+    const random = Math.random().toString();
+    const emailVerifyHash = crypto.createHash('sha1').update(current_date + random).digest('hex');
+
+    const user = await User.create({...params, emailVerifyHash})
+    .intercept('E_UNIQUE', (err)=> {
+      return 'Email or username already exists.';
+    }).intercept((err) => {
+      return err;
+    }).fetch();
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {user: 'muhammadafzal3303@gmail.com', pass: 'ebuyexchange-testing'}
+    });
+
+    const mailOptions = {
+      from: 'support@ebuyexchange.com', // sender address
+      to: user.email, // list of receivers
+      subject: 'eBuyExhcange: Verify Your Account', // Subject line
+      html: "<p>Click on the link bellow to verify your account.</p> <a href='https://ebuyexchange-demo.firebaseapp.com?hash=" + emailVerifyHash + "'>Verify your account.</a>"
+    };
+
+    transporter.sendMail(mailOptions, function (err, info) {
+      if(err)
+        sails.log(err)
+      else
+        sails.log(info);
+    });
+
+    return res.status(200).json({user});
+  },
+
 };
