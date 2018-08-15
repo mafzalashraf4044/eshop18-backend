@@ -78,44 +78,21 @@ module.exports = {
 
     //  Feilds Pattern Validation
     if (params.firstName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.firstName)) {
-      return res.json(400, {msg: 'First name is invalid.'});
+      return res.json(400, {details: 'First name is invalid.'});
     } else if (params.lastName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.lastName)) {
-      return res.json(400, {msg: 'Last name is invalid.'});
+      return res.json(400, {details: 'Last name is invalid.'});
     } else if (params.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email)) {
-      return res.json(400, {msg: 'Email is invalid.'});
+      return res.json(400, {details: 'Email is invalid.'});
     } else if (params.username && !/^[a-zA-Z0-9][a-zA-Z0-9]+[a-zA-Z0-9]$/.test(params.username)) {
-      return res.json(400, {msg: 'Username is invalid.'});
+      return res.json(400, {details: 'Username is invalid.'});
     }
 
-    const current_date = (new Date()).valueOf().toString();
-    const random = Math.random().toString();
-    const emailVerifyHash = crypto.createHash('sha1').update(current_date + random).digest('hex');
-
-    const user = await User.create({...params, emailVerifyHash})
+    const user = await User.create(params)
     .intercept('E_UNIQUE', (err)=> {
       return 'Email or username already exists.';
     }).intercept((err) => {
       return err;
     }).fetch();
-
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {user: 'muhammadafzal3303@gmail.com', pass: 'ebuyexchange-testing'}
-    });
-
-    const mailOptions = {
-      from: 'support@ebuyexchange.com', // sender address
-      to: user.email, // list of receivers
-      subject: 'eBuyExhcange: Verify Your Account', // Subject line
-      html: "<p>Click on the link bellow to verify your account.</p> <a href='https://ebuyexchange-demo.firebaseapp.com?hash=" + emailVerifyHash + "'>Verify your account.</a>"
-    };
-
-    transporter.sendMail(mailOptions, function (err, info) {
-      if(err)
-        sails.log(err)
-      else
-        sails.log(info);
-    });
 
     return res.status(200).json({user});
   },
@@ -137,18 +114,18 @@ module.exports = {
     const params = req.allParams();
 
     if (params.password) {
-      return res.json(400, {msg: 'Invalid arguments provided.'});
+      return res.json(400, {details: 'Invalid arguments provided.'});
     }
 
     //  Feilds Pattern Validation
     if (params.firstName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.firstName)) {
-      return res.json(400, {msg: 'First name is invalid.'});
+      return res.json(400, {details: 'First name is invalid.'});
     } else if (params.lastName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.lastName)) {
-      return res.json(400, {msg: 'Last name is invalid.'});
+      return res.json(400, {details: 'Last name is invalid.'});
     } else if (params.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email)) {
-      return res.json(400, {msg: 'Email is invalid.'});
+      return res.json(400, {details: 'Email is invalid.'});
     } else if (params.username && !/^[a-zA-Z0-9][a-zA-Z0-9]+[a-zA-Z0-9]$/.test(params.username)) {
-      return res.json(400, {msg: 'Username is invalid.'});
+      return res.json(400, {details: 'Username is invalid.'});
     }
 
     const user = await User.update({id: params.id, isArchived: false}, {
@@ -184,9 +161,9 @@ module.exports = {
     }).fetch();
 
     if (!user) {
-      return res.status(404).json({msg: 'User does not exist.'});
+      return res.status(404).json({details: 'User does not exist.'});
     } else {
-      return res.status(200).json({msg: 'User deleted successfully.'});
+      return res.status(200).json({details: 'User deleted successfully.'});
     }
     
   },
@@ -204,7 +181,7 @@ module.exports = {
 
     if (_.isUndefined(params.isVerified)) {
       return res.json(400, {
-        msg: 'Field isVerified is required.'
+        details: 'Field isVerified is required.'
       });
     }
 
@@ -217,7 +194,6 @@ module.exports = {
     return res.status(200).json({user: _.head(user)});
 
   },
-
 
   verifyEmail: async (req, res) => {
     /**
@@ -232,7 +208,7 @@ module.exports = {
 
     if (_.isUndefined(params.emailVerifyHash)) {
       return res.json(400, {
-        msg: 'Field emailVerifyHash is required.'
+        details: 'Field emailVerifyHash is required.'
       });
     }
 
@@ -248,7 +224,7 @@ module.exports = {
       });
     }
 
-    return res.status(200).json({msg: "User email verified successfully."});
+    return res.status(200).json({details: "User email verified successfully."});
 
   },
 
@@ -268,7 +244,7 @@ module.exports = {
 
     if (!params.subject || !params.content || !params.emails || params.emails.length === 0) {
       return res.json(400, {
-        msg: 'Invalid parameters.'
+        details: 'Invalid parameters.'
       });
     }
 
@@ -291,7 +267,31 @@ module.exports = {
         sails.log(info);
     });
 
-    return res.status(200).json({msg: "Email sent successfully."});
+    return res.status(200).json({details: "Email sent successfully."});
 
   },
+
+  getUserOrdersAndAccounts: async (req, res) => {
+    /**
+    * Params:
+    * - id (req, query param)
+    */
+
+   sails.log('UsersController::getUserOrdersAndAccounts called');
+
+   const params = req.allParams();
+   
+   const orders = await Order.find({user: params.id})
+   .intercept((err) => {
+    return err;
+   });
+
+   const accounts = await Account.find({owner: params.id})
+   .intercept((err) => {
+    return err;
+   });
+
+   return res.status(200).json({orders, accounts});
+  },
+
 };
