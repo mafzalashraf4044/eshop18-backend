@@ -41,7 +41,9 @@ module.exports.routes = {
 
   'POST /login': 'AuthController.login',
   'GET /logout': 'AuthController.logout',
-
+  'POST /admin-login': 'AuthController.adminLogin',
+  'GET /is-logged-in': 'AuthController.isLoggedIn',
+  
   'GET /user': 'UserController.getUsers',
   'POST /user': 'UserController.createUser',
   'PATCH /user/:id': 'UserController.updateUser',
@@ -49,7 +51,12 @@ module.exports.routes = {
   'POST /update-verifed-status/:id': 'UserController.updateVerfiedStatus',
   'POST /verify-email/:id': 'UserController.verifyEmail',
   'POST /send-email-to-list': 'UserController.sendEmailToList',
-  
+  'GET /get-user-orders-and-accounts/:id': 'UserController.getUserOrdersAndAccounts',
+  'POST /register-user': 'UserController.registerUser',
+  'PATCH /edit-profile/:id': 'UserController.editProfile',
+  'PATCH /change-password/:id': 'UserController.changePassword',
+
+
   'GET /news': 'NewsController.getNews',
   'POST /news': 'NewsController.createNews',
   'PATCH /news/:id': 'NewsController.updateNews',
@@ -69,6 +76,7 @@ module.exports.routes = {
   'POST /order': 'OrderController.createOrder',
   'PATCH /order/:id': 'OrderController.updateOrder',
   'DELETE /order/:id': 'OrderController.deleteOrder',
+  'POST /update-order-status/:id': 'OrderController.updateOrderStatus',
 
   'GET /account': 'AccountController.getAccounts',
   'POST /account': 'AccountController.createAccount',

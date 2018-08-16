@@ -10,7 +10,7 @@ const bcrypt = require('bcrypt');
 module.exports = {
 
   customToJSON: function() {
-    return _.omit(this, ['password']);
+    return _.omit(this, ['password', 'emailVerifyHash']);
   },
 
   beforeCreate: async (user, proceed) => {
@@ -68,6 +68,12 @@ module.exports = {
     orders: {
       collection: 'order',
       via: 'user',
+    },
+
+    role: {
+      type: 'string',
+      isIn: ['__admin', '__customer'],
+      defaultsTo: '__customer',
     },
 
     isVerified: {

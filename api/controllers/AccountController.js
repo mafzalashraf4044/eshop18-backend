@@ -128,9 +128,9 @@ module.exports = {
     }).fetch();
 
     if (!account) {
-      return res.status(404).json({msg: 'Account does not exist.'});
+      return res.status(404).json({details: 'Account does not exist.'});
     } else {
-      return res.status(200).json({msg: 'Account deleted successfully.'});
+      return res.status(200).json({details: 'Account deleted successfully.'});
     }
     
   },

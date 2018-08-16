@@ -25,11 +25,11 @@ module.exports = {
     const params = req.allParams();
     
     const criteria = {where: {isArchived: false}};
-    const fields = ['title', 'content'];
+    const fields = ['_id', 'title', 'content'];
 
     //  search query
     if (params.searchTerm) {
-      criteria.or = _.map(fields, (field) => ({[field]: {contains: params.searchTerm}}));
+      criteria.where.or = _.map(fields, (field) => ({[field]: field === '_id' ? params.searchTerm : {contains: params.searchTerm}}));
     }
 
     //  pagination
@@ -43,14 +43,16 @@ module.exports = {
       criteria.sort = `${params.sortBy} ${params.sortType}`;
     }
 
-    if (params.latest) {
-      const startDate = moment(moment().format("YYYY-MM-DD")).toISOString();
-      const endDate = moment(moment().format("YYYY-MM-DD")).subtract(30, 'days').toISOString();
+    if (params.latest === 'true') {
+      const startDate = moment();
+      const endDate = moment().subtract(30, 'days');
   
-      criteria.push({
-        createdAt: {'>=': end, '<=': start},
-      });
+      sails.log('startData', startDate)
+
+      criteria.where.createdAt = {'>=': endDate, '<=': startDate};
     }
+
+    sails.log(criteria)
 
     const news = await News.find(criteria)
     .intercept((err) => {
@@ -99,7 +101,7 @@ module.exports = {
       return err;
     }).fetch();
 
-    return res.status(200).json({user: _.head(news)});
+    return res.status(200).json({news: _.head(news)});
   },
 
   deleteNews: async (req, res) => {
@@ -119,9 +121,9 @@ module.exports = {
     }).fetch();
 
     if (!news) {
-      return res.status(404).json({msg: 'News does not exist.'});
+      return res.status(404).json({details: 'News does not exist.'});
     } else {
-      return res.status(200).json({msg: 'News deleted successfully.'});
+      return res.status(200).json({details: 'News deleted successfully.'});
     }
     
   },
