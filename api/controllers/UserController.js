@@ -361,4 +361,92 @@ module.exports = {
     return res.status(200).json({user});
   },
 
+  editProfile: async (req, res) => {
+    /**
+     * Params:
+     * - id (req, query param)
+     * - firstName (req)
+     * - lastName (req)
+     * - username
+     * - email (req)
+     * - country (req)
+     * - contactNumber (req)
+    */
+
+    sails.log('UsersController:: editProfile called');
+
+    const params = req.allParams();
+
+    if (params.password) {
+      return res.json(400, {details: 'Invalid arguments provided.'});
+    }
+
+    //  Feilds Pattern Validation
+    if (params.firstName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.firstName)) {
+      return res.json(400, {details: 'First name is invalid.'});
+    } else if (params.lastName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.lastName)) {
+      return res.json(400, {details: 'Last name is invalid.'});
+    } else if (params.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email)) {
+      return res.json(400, {details: 'Email is invalid.'});
+    } else if (params.username && !/^[a-zA-Z0-9][a-zA-Z0-9]+[a-zA-Z0-9]$/.test(params.username)) {
+      return res.json(400, {details: 'Username is invalid.'});
+    }
+
+    const user = await User.update({id: params.id, isArchived: false}, {
+      firstName: params.firstName,
+      lastName: params.lastName,
+      username: params.username,
+      email: params.email,
+      country: params.country,
+      contactNumber: params.contactNumber,
+    }).intercept('E_UNIQUE', (err)=> {
+      return 'Email or username already exists.';
+    }).intercept((err) => {
+      return err;
+    }).fetch();
+
+    return res.status(200).json({user: _.head(user)});
+  },
+
+  changePassword: async (req, res) => {
+    /**
+     * Params:
+     * - oldPwd (req)
+     * - newPwd (req)
+     * - id (query param, req)
+    */
+
+    sails.log('UsersController:: changePassword called');
+
+    const params = req.allParams();
+
+    //  Feilds Pattern Validation
+    if (!params.oldPwd || !params.newPwd) {
+      return res.json(400, {details: 'Some fields are invalid.'});
+    } 
+
+    let user = await User.findOne({id: params.id, isArchived: false})
+    .intercept((err) => {
+      return err;
+    });
+
+    const isPwdMatched = await bcrypt.compare(params.oldPwd, user.password);
+    
+    if (isPwdMatched) {
+      const passwordHash = await bcrypt.hash(params.newPwd, 10);
+
+      user = await User.update({id: params.id, isArchived: false}, {
+        password: passwordHash,
+      }).intercept((err) => {
+        return err;
+      }).fetch();
+
+      return res.json(200, {user: _.head(user)});
+    } else {
+      return res.json(400, {details: 'Old password is invalid.'});
+    }
+
+
+    return res.status(200).json({user});
+  },
 };
