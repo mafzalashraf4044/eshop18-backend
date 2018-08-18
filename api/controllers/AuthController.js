@@ -14,10 +14,32 @@ module.exports = {
   login: function (req, res) {
     passport.authenticate('local', {
       session: false
+    }, (err, user, details) => {
+
+      if (err || !user || (user && user.role === '__admin')) {
+        return res.status(403).json(details);
+      }
+
+      req.login(user, {
+        session: false
+      }, (err) => {
+        if (err) {
+          res.send(err);
+        }
+        // generate a signed json web token with the contents of user object and return it in the response
+        const token = jwt.sign(user, 'your_jwt_secret', { expiresIn: '7d' });
+        return res.status(200).json({ user, token });
+      });
+    })(req, res);
+  },
+
+  adminLogin: function (req, res) {
+    passport.authenticate('local', {
+      session: false
     }, (err, user, message) => {
 
-      if (err || !user) {
-        return res.status(400).json({ message, user });
+      if (err || !user || (user && user.role !== '__admin')) {
+        return res.forbidden();
       }
 
       req.login(user, {
@@ -35,8 +57,20 @@ module.exports = {
 
   logout: function(req, res) {
     req.logout();
-    res.status(200).json({ msg: 'Logout successful.' })
+    res.status(200).json({ details: 'Logout successful.' })
   },
+
+  isLoggedIn: function(req, res) {
+    passport.authenticate('jwt', {
+      session: false
+    }, (err, user) => {
+      if (err || !user) {
+        return res.forbidden();
+      } else {
+        return res.status(200).json({user});
+      }
+    })(req, res);
+  }
 
   // login: async (req, res) => {
   //   /**

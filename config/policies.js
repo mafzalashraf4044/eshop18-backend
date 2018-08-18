@@ -17,14 +17,62 @@ module.exports.policies = {
   *                                                                          *
   ***************************************************************************/
 
- 
- 'login': true,
+  AuthController: {
+    login: true,
+    adminLogin: true,
+    isLoggedIn: true,
+    logout: true,
+  },
 
-//  '*': 'isAuthenticated',
-//  'EcurrencyController': 'isAuthenticated',
-//  'NewsController': 'isAuthenticated',
-//  'OrderController': 'isAuthenticated',
-//  'PaymentMethodController': 'isAuthenticated',
-//  'UserController': 'isAuthenticated',
+  UserController: {
+    getUsers: 'isAuthenticatedAdmin',
+    createUser: 'isAuthenticatedAdmin',
+    updateUser: 'isAuthenticatedAdmin',
+    deleteUser: 'isAuthenticatedAdmin',
+    updateVerfiedStatus: 'isAuthenticatedAdmin',
+    verifyEmail: 'isAuthenticatedAdmin',
+    sendEmailToList: 'isAuthenticatedAdmin',
+    getUserOrdersAndAccounts: 'isAuthenticatedAdmin',
+
+    registerUser: true,
+    editProfile: 'isAuthenticatedCustomer',
+    changePassword: 'isAuthenticatedCustomer',
+  },
+
+  AccountController: {
+    getAccounts: 'isAuthenticatedAdmin',
+    createAccount: 'isAuthenticatedAdmin',
+    updateAccount: 'isAuthenticatedAdmin',
+    deleteAccount: 'isAuthenticatedAdmin',
+  },
+
+  EcurrencyController: {
+    getECurrencies: 'isAuthenticatedAdmin',
+    createECurrency: 'isAuthenticatedAdmin',
+    updateECurrency: 'isAuthenticatedAdmin',
+    deleteECurrency: 'isAuthenticatedAdmin',
+  },
+
+  OrderController: {
+    getOrders: 'isAuthenticatedAdmin',
+    createOrder: 'isAuthenticatedAdmin',
+    updateOrder: 'isAuthenticatedAdmin',
+    deleteOrder: 'isAuthenticatedAdmin',
+    updateOrderStatus: 'isAuthenticatedAdmin',
+  },
+
+  PaymentMethodController: {
+    getPaymentMethods: 'isAuthenticatedAdmin',
+    createPaymentMethod: 'isAuthenticatedAdmin',
+    updatePaymentMethod: 'isAuthenticatedAdmin',
+    deletePaymentMethod: 'isAuthenticatedAdmin',
+  },
+
+  NewsController: {
+    getNews: true,
+    createNews: 'isAuthenticatedAdmin',
+    updateNews: 'isAuthenticatedAdmin',
+    deleteNews: 'isAuthenticatedAdmin',
+  },
 
 };
