@@ -56,7 +56,6 @@ module.exports.routes = {
   'PATCH /edit-profile/:id': 'UserController.editProfile',
   'PATCH /change-password/:id': 'UserController.changePassword',
 
-
   'GET /news': 'NewsController.getNews',
   'POST /news': 'NewsController.createNews',
   'PATCH /news/:id': 'NewsController.updateNews',
@@ -79,6 +78,7 @@ module.exports.routes = {
   'POST /update-order-status/:id': 'OrderController.updateOrderStatus',
   'POST /currency-calculator': 'OrderController.currencyCalculator',
   'POST /place-order': 'OrderController.placeOrder',
+  'GET /user-orders': 'OrderController.getUserOrders',
 
   'GET /account': 'AccountController.getAccounts',
   'POST /account': 'AccountController.createAccount',

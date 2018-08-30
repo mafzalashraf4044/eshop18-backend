@@ -30,7 +30,7 @@ module.exports.policies = {
     updateUser: 'isAuthenticatedAdmin',
     deleteUser: 'isAuthenticatedAdmin',
     updateVerfiedStatus: 'isAuthenticatedAdmin',
-    verifyEmail: 'isAuthenticatedAdmin',
+    verifyEmail: true,
     sendEmailToList: 'isAuthenticatedAdmin',
     getUserOrdersAndAccounts: 'isAuthenticatedAdmin',
 
@@ -64,6 +64,7 @@ module.exports.policies = {
     updateOrderStatus: 'isAuthenticatedAdmin',
 
     placeOrder: 'isAuthenticatedCustomer',
+    getUserOrders: 'isAuthenticatedCustomer',
   },
 
   PaymentMethodController: {

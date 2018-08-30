@@ -348,7 +348,7 @@ module.exports = {
       from: 'support@ebuyexchange.com', // sender address
       to: user.email, // list of receivers
       subject: 'eBuyExhcange: Verify Your Account', // Subject line
-      html: "<p>Click on the link bellow to verify your account.</p> <a href='https://ebuyexchange-demo.firebaseapp.com?hash=" + emailVerifyHash + "'>Verify your account.</a>"
+      html: "<p>Click on the link bellow to verify your account.</p> <a href='https://23.254.131.71:4000?hash=" + emailVerifyHash + "&id=" + user.id + "'>Verify your account.</a>"
     };
 
     transporter.sendMail(mailOptions, function (err, info) {

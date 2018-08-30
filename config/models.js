@@ -33,7 +33,7 @@ module.exports.models = {
   * > For more info, see:                                                    *
   * > https://sailsjs.com/docs/concepts/orm/model-settings#?schema           *
   *                                                                          *
-  ***************************************************************************/
+  ***************************************************************************/ 
 
   // schema: true,
 

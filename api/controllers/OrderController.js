@@ -5,6 +5,8 @@
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
 
+const nodemailer = require('nodemailer');
+
 module.exports = {
 
   getOrders: async (req, res) => {
@@ -183,7 +185,7 @@ module.exports = {
     });
 
     if (eCurrency) {
-      const index = _.findIndex(eCurrency.buyCommissions, (commission) => commission.title === (params.type === 'buy' ? params.from : params.to));
+      const index = _.findIndex(eCurrency[`${params.type}Commissions`], (commission) => commission.title === (params.type === 'buy' ? params.from : params.to));
       const commission = eCurrency[`${params.type}Commissions`][index];
 
       const commissionAmount = ((parseFloat(params.firstAmount) * parseFloat(commission.percentage)) / 100) + parseFloat(commission.fixed);
@@ -219,7 +221,7 @@ module.exports = {
     });
 
     if (eCurrency) {
-      const index = _.findIndex(eCurrency.buyCommissions, (commission) => commission.title === (params.type === 'buy' ? params.from : params.to));
+      const index = _.findIndex(eCurrency[`${params.type}Commissions`], (commission) => commission.title === (params.type === 'buy' ? params.from : params.to));
       const commission = eCurrency[`${params.type}Commissions`][index];
 
       const commissionAmount = ((parseFloat(params.firstAmount) * parseFloat(commission.percentage)) / 100) + parseFloat(commission.fixed);
@@ -239,10 +241,45 @@ module.exports = {
         return err;
       }).fetch();
 
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {user: 'muhammadafzal3303@gmail.com', pass: 'ebuyexchange-testing'}
+      });
+  
+      const mailOptions = {
+        from: 'support@ebuyexchange.com', // sender address
+        to: user.email, // list of receivers
+        subject: 'eBuyExhcange: Order Confirmation', // Subject line
+        html: "<p>Your order has been placed successfully.</p>"
+      };
+  
+      transporter.sendMail(mailOptions, function (err, info) {
+        if(err)
+          sails.log(err)
+        else
+          sails.log(info);
+      });
+
       return res.status(200).json({order});
     }
     
     return res.status(400).json({details: 'Provided parameters are invaid.'});      
   },
+
+  getUserOrders: async (req, res) => {
+    sails.log('OrderController::getUserOrders called');
+
+    const params = req.allParams();
+    
+    const criteria = {where: {isArchived: false, user: req.user.id}};
+
+    let orders = await Order.find(criteria).intercept((err) => {
+      return err;
+    });
+
+    sails.log('orders', orders)
+
+    return res.status(200).json({orders});
+  }
 };
 
