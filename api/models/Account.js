@@ -21,7 +21,7 @@ module.exports = {
 
     accountType: {
       type: 'string',
-      isIn: ['paymentmethod', 'eaccount'],
+      isIn: ['paymentmethod', 'ecurrency'],
       required: true,
     },
 
@@ -32,21 +32,10 @@ module.exports = {
     eCurrency: {
       model: 'ecurrency'
     },
-    
-    bankName: {
-      type: 'string',
-    },
-
-    bankAddress: {
-      type: 'string',
-    },
-
-    bankSwiftCode: {
-      type: 'string',
-    },
 
     owner: {
-      model: 'user'
+      model: 'user',
+      required: true,
     },
 
     isArchived: {

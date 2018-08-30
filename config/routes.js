@@ -77,10 +77,14 @@ module.exports.routes = {
   'PATCH /order/:id': 'OrderController.updateOrder',
   'DELETE /order/:id': 'OrderController.deleteOrder',
   'POST /update-order-status/:id': 'OrderController.updateOrderStatus',
+  'POST /currency-calculator': 'OrderController.currencyCalculator',
+  'POST /place-order': 'OrderController.placeOrder',
 
   'GET /account': 'AccountController.getAccounts',
   'POST /account': 'AccountController.createAccount',
   'PATCH /account/:id': 'AccountController.updateAccount',
   'DELETE /account/:id': 'AccountController.deleteAccount',
+  'GET /user-account': 'AccountController.getUserAccounts',
+  'POST /user-account': 'AccountController.createUserAccount',
 
 };

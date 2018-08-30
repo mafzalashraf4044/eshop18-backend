@@ -28,19 +28,22 @@ module.exports = {
       return err;
     });
 
-    let commissions = [
-      ...eCurrencies.map(eCurrency => ({
-          title: eCurrency.title, percentage: 0, fixed: 0
-      })),
-      ...paymentMethods.map(paymentMethod => ({
-          title: paymentMethod.title, percentage: 0, fixed: 0
-      }))
-    ];
+    const buyCommissions = paymentMethods.map(paymentMethod => ({
+      title: paymentMethod.title, percentage: 0, fixed: 0
+    }));
+    
+    const sellCommissions = paymentMethods.map(paymentMethod => ({
+      title: paymentMethod.title, percentage: 0, fixed: 0
+    }));
+
+    const exchangeCommissions = eCurrencies.map(eCurrency => ({
+      title: eCurrency.title, percentage: 0, fixed: 0
+    }));
 
     _.forEach(eCurrencies, async (eCurrency, index) => {
       
       // buy commission
-      const newBuyCommissions = _.filter(commissions, (commission) => (eCurrency.title !== commission.title));
+      const newBuyCommissions = _.filter(buyCommissions, (commission) => (eCurrency.title !== commission.title));
       
       _.forEach(eCurrency.buyCommissions, buyCommission => {
         const index = _.findIndex(newBuyCommissions, (newBuyCommission) => (newBuyCommission.title === buyCommission.title));
@@ -51,7 +54,7 @@ module.exports = {
       });
 
       // sell commission
-      let newSellCommissions = _.filter(commissions, (commission) => (eCurrency.title !== commission.title));
+      let newSellCommissions = _.filter(sellCommissions, (commission) => (eCurrency.title !== commission.title));
 
       _.forEach(eCurrency.sellCommissions, sellCommission => {
         const index = _.findIndex(newSellCommissions, (newSellCommission) => (newSellCommission.title === sellCommission.title));
@@ -62,7 +65,7 @@ module.exports = {
       });
 
       // exchange commission
-      let newExchangeCommissions = _.filter(commissions, (commission) => (eCurrency.title !== commission.title));
+      let newExchangeCommissions = _.filter(exchangeCommissions, (commission) => (eCurrency.title !== commission.title));
 
       _.forEach(eCurrency.exchangeCommissions, exchangeCommission => {
         const index = _.findIndex(newExchangeCommissions, (newExchangeCommission) => (newExchangeCommission.title === exchangeCommission.title));

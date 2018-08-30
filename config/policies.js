@@ -40,14 +40,17 @@ module.exports.policies = {
   },
 
   AccountController: {
-    getAccounts: 'isAuthenticatedAdmin',
+    getAccounts: true,
     createAccount: 'isAuthenticatedAdmin',
     updateAccount: 'isAuthenticatedAdmin',
     deleteAccount: 'isAuthenticatedAdmin',
+
+    getUserAccounts: 'isAuthenticatedCustomer',
+    createUserAccount: 'isAuthenticatedCustomer',
   },
 
   EcurrencyController: {
-    getECurrencies: 'isAuthenticatedAdmin',
+    getECurrencies: true,
     createECurrency: 'isAuthenticatedAdmin',
     updateECurrency: 'isAuthenticatedAdmin',
     deleteECurrency: 'isAuthenticatedAdmin',
@@ -59,10 +62,12 @@ module.exports.policies = {
     updateOrder: 'isAuthenticatedAdmin',
     deleteOrder: 'isAuthenticatedAdmin',
     updateOrderStatus: 'isAuthenticatedAdmin',
+
+    placeOrder: 'isAuthenticatedCustomer',
   },
 
   PaymentMethodController: {
-    getPaymentMethods: 'isAuthenticatedAdmin',
+    getPaymentMethods: true,
     createPaymentMethod: 'isAuthenticatedAdmin',
     updatePaymentMethod: 'isAuthenticatedAdmin',
     deletePaymentMethod: 'isAuthenticatedAdmin',

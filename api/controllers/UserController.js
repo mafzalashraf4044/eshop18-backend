@@ -25,7 +25,7 @@ module.exports = {
 
     const params = req.allParams();
     
-    const criteria = {where: {isArchived: false}};
+    const criteria = {where: {isArchived: false, role: '__customer'}};
     const fields = ['firstName', 'lastName', 'email', 'username', 'country', 'contactNumber'];
 
     //  search query

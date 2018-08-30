@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 
 passport.use(new LocalStrategy({usernameField: 'email', passwordField: 'password' }, async (email, password, proceed)  => {
   const user = _.head(await User.find({email}));
+
   if (!user) {
     return proceed(null, null, {details: 'Invalid credentials.'});
   } else {

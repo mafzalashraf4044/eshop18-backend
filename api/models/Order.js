@@ -9,11 +9,6 @@ module.exports = {
 
   attributes: {
 
-    country: {
-      type: 'string',
-      required: true,
-    },
-
     sentFrom: {
       type: 'string',
       required: true,
@@ -50,12 +45,7 @@ module.exports = {
       isIn: ['completed', 'pending', 'cancelled', 'rejected'],
       defaultsTo: 'pending',
     },
-
-    action: {
-      type: 'string',
-      allowNull: true,
-    },
-
+    
     isArchived: {
       type: 'boolean',
       defaultsTo: false

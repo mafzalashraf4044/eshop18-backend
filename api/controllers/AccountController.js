@@ -57,9 +57,6 @@ module.exports = {
      * - accountType (req)
      * - paymentMethod
      * - eCurrency
-     * - bankName
-     * - bankAddress
-     * - bankSwiftCode
      * - owner (req)
     */
 
@@ -134,6 +131,91 @@ module.exports = {
     }
     
   },
+
+  getUserAccounts: async (req, res) => {
+    /**
+    * Params:
+    * - searchTerm
+    * - sortBy (ASC or DESC)
+    * - sortType
+    * - pageNum
+    * - pageSize
+    */
+
+    sails.log('AccountController::getAccounts called');
+
+    const params = req.allParams();
+    
+    const criteria = {where: {isArchived: false, owner: req.user.id}};
+    const fields = ['title', 'content'];
+
+    //  search query
+    if (params.searchTerm) {
+      criteria.or = _.map(fields, (field) => ({[field]: {contains: params.searchTerm}}));
+    }
+
+    //  pagination
+    if ((params.pageNum && params.pageNum > 0) && (params.pageSize && params.pageSize > 0)) {
+      criteria.limit = params.pageSize;
+      criteria.skip = params.pageSize * (params.pageNum - 1);
+    }
+
+    //  sorting
+    if ((params.sortType === 'ASC' || params.sortType === 'DESC') && (params.sortBy && fields.indexOf(params.sortBy) !== -1)) {
+      criteria.sort = `${params.sortBy} ${params.sortType}`;
+    }
+
+    const accounts = await Account.find(criteria)
+    .populate('eCurrency')
+    .populate('paymentMethod')
+    .intercept((err) => {
+      return err;
+    });
+
+    return res.status(200).json({accounts});
+
+  },
+
+  createUserAccount: async (req, res) => {
+    /**
+     * Params:
+     * - accountName (req)
+     * - accountNum (req)
+     * - accountType (req)
+     * - paymentMethod
+     * - eCurrency
+    */
+
+    sails.log('AccountController:: createUserAccount called');
+
+    const params = req.allParams();
+    const accountModel = params.accountType === 'paymentmethod' ? {paymentMethod: params.paymentMethod} : {eCurrency: params.eCurrency};
+
+    if (!params.accountName || !params.accountNum || ['paymentmethod', 'ecurrency'].indexOf(params.accountType) === -1) {
+      return res.status(400).json({details: 'Invalid parameters.'});
+    }
+
+    let account = await Account.create({
+      ...accountModel,
+      owner: req.user.id,
+      accountName: params.accountName,
+      accountNum: params.accountNum,
+      accountType: params.accountType,
+    })
+    .intercept((err) => {
+      return err;
+    }).fetch();
+    
+    account = await Account.findOne({id: account.id})
+    .populate('eCurrency')
+    .populate('paymentMethod')
+    .intercept((err) => {
+      return err;
+    });
+
+    return res.status(200).json({account});
+  },
+
 
 };
 

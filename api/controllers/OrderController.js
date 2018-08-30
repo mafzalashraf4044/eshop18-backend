@@ -92,7 +92,6 @@ module.exports = {
     /**
      * Params:
      * - id (req, query param)
-     * - country (req)
      * - sentFrom (req)
      * - amountSent (req)
      * - receivedIn (req)
@@ -100,16 +99,13 @@ module.exports = {
      * - user (req)
      * - type (req)
      * - status
-     * - action
     */
 
     sails.log('OrderController:: updateOrder called');
 
     const params = req.allParams();
 
-    const order = await Order.update({id: params.id, isArchived: false}, {
-      title: params.title,
-    }).intercept((err) => {
+    const order = await Order.update({id: params.id, isArchived: false}, params).intercept((err) => {
       return err;
     }).fetch();
 
@@ -164,5 +160,89 @@ module.exports = {
     return res.status(200).json({order: _.head(order)});
   },
 
+  currencyCalculator: async (req, res) => {
+    /**
+     * Params:
+     * - type (req)
+     * - firstAmount (req)
+     * - from (req)
+     * - to (req)
+    */
+
+    sails.log('OrderController:: currencyCalculator called');
+
+    const params = req.allParams();
+
+    if (['buy', 'sell', 'exchange'].indexOf(params.type) === -1 || !params.firstAmount || !params.from || !params.to) {
+      return res.status(400).json({details: 'Provided parameters are invaid.'});     
+    }
+
+    const eCurrency = await Ecurrency.findOne({title: params.type === 'buy' ? params.to : params.from})
+    .intercept((err) => {
+      return err;
+    });
+
+    if (eCurrency) {
+      const index = _.findIndex(eCurrency.buyCommissions, (commission) => commission.title === (params.type === 'buy' ? params.from : params.to));
+      const commission = eCurrency[`${params.type}Commissions`][index];
+
+      const commissionAmount = ((parseFloat(params.firstAmount) * parseFloat(commission.percentage)) / 100) + parseFloat(commission.fixed);
+      const serviceCharges =  `${commission.percentage.toString()}% + ${commission.fixed.toString()} = ${commissionAmount.toFixed(2)}`;
+
+      const secondAmount = parseFloat(params.firstAmount) + parseFloat(commissionAmount);
+      return res.status(200).json({serviceCharges, secondAmount: secondAmount.toFixed(2)});
+    }
+    
+    return res.status(400).json({details: 'Provided parameters are invaid.'});      
+  },
+
+  placeOrder: async (req, res) => {
+    /**
+     * Params:
+     * - type (req)
+     * - firstAmount (req)
+     * - from (req)
+     * - to (req)
+    */
+
+    sails.log('OrderController:: placeOrder called');
+
+    const params = req.allParams();
+
+    if (['buy', 'sell', 'exchange'].indexOf(params.type) === -1 || !params.firstAmount || !params.from || !params.to) {
+      return res.status(400).json({details: 'Provided parameters are invaid.'});     
+    }
+
+    const eCurrency = await Ecurrency.findOne({title: params.type === 'buy' ? params.to : params.from})
+    .intercept((err) => {
+      return err;
+    });
+
+    if (eCurrency) {
+      const index = _.findIndex(eCurrency.buyCommissions, (commission) => commission.title === (params.type === 'buy' ? params.from : params.to));
+      const commission = eCurrency[`${params.type}Commissions`][index];
+
+      const commissionAmount = ((parseFloat(params.firstAmount) * parseFloat(commission.percentage)) / 100) + parseFloat(commission.fixed);
+      const serviceCharges =  `${commission.percentage.toString()}% + ${commission.fixed.toString()} = ${commissionAmount.toFixed(2)}`;
+
+      const secondAmount = parseFloat(params.firstAmount) + parseFloat(commissionAmount);
+
+      const order = await Order.create({
+        sentFrom: params.from,
+        amountSent: params.firstAmount,
+        receivedIn: params.to,
+        amountReceived: secondAmount,
+        user: req.user.id,
+        type: params.type,
+      })
+      .intercept((err) => {
+        return err;
+      }).fetch();
+
+      return res.status(200).json({order});
+    }
+    
+    return res.status(400).json({details: 'Provided parameters are invaid.'});      
+  },
 };
 
