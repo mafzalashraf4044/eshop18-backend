@@ -179,8 +179,14 @@ module.exports = {
   createUserAccount: async (req, res) => {
     /**
      * Params:
-     * - accountName (req)
-     * - accountNum (req)
+     * - firstName
+     * - lastName
+     * - accountName
+     * - accountNum
+     * - details
+     * - bankName
+     * - bankAddress
+     * - bankSwiftCode
      * - accountType (req)
      * - paymentMethod
      * - eCurrency
@@ -191,16 +197,14 @@ module.exports = {
     const params = req.allParams();
     const accountModel = params.accountType === 'paymentmethod' ? {paymentMethod: params.paymentMethod} : {eCurrency: params.eCurrency};
 
-    if (!params.accountName || !params.accountNum || ['paymentmethod', 'ecurrency'].indexOf(params.accountType) === -1) {
+    if (['paymentmethod', 'ecurrency'].indexOf(params.accountType) === -1) {
       return res.status(400).json({details: 'Invalid parameters.'});
     }
 
     let account = await Account.create({
       ...accountModel,
       owner: req.user.id,
-      accountName: params.accountName,
-      accountNum: params.accountNum,
-      accountType: params.accountType,
+      ...params,
     })
     .intercept((err) => {
       return err;
@@ -216,6 +220,66 @@ module.exports = {
     return res.status(200).json({account});
   },
 
+  editUserAccount: async (req, res) => {
+    /**
+     * Params:
+     * - id (req, query param)
+     * - firstName
+     * - lastName
+     * - accountName
+     * - accountNum
+     * - details
+     * - bankName
+     * - bankAddress
+     * - bankSwiftCode
+    */
+
+    sails.log('AccountController:: editUserAccount called');
+
+    const params = req.allParams();
+    const criteria = {id: params.id, isArchived: false};
+
+    if (params.accountType || params.eCurrency || params.paymentMethod || params.owner) {
+      return res.status(400).json({details: 'Invalid parameters.'});
+    }
+
+    let account = await Account.update(criteria, params).intercept((err) => {
+      return err;
+    }).fetch();
+
+    account = await Account.findOne(criteria)
+    .populate('eCurrency')
+    .populate('paymentMethod')
+    .intercept((err) => {
+      return err;
+    });
+
+    return res.status(200).json({account});
+  },
+
+  deleteUserAccount: async (req, res) => {
+    /**
+     * Params:
+     * - id (req, query param)
+    */
+
+    sails.log('AccountController:: deleteUserAccount called');
+
+    const params = req.allParams();
+
+    const account = await Account.update({id: params.id, isArchived: false}, {
+      isArchived: true,
+    }).intercept((err) => {
+      return err;
+    }).fetch();
+
+    if (!account) {
+      return res.status(404).json({details: 'User account does not exist.'});
+    } else {
+      return res.status(200).json({details: 'User account deleted successfully.'});
+    }
+    
+  },
 
 };
 
