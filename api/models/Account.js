@@ -8,15 +8,45 @@
 module.exports = {
 
   attributes: {
+    
+    firstName: {
+      type: 'string',
+      defaultsTo: '-',
+    },
+
+    lastName: {
+      type: 'string',
+      defaultsTo: '-',
+    },
 
     accountName: {
       type: 'string',
-      required: true,
+      defaultsTo: '-',
     },
 
     accountNum: {
       type: 'string',
-      required: true,
+      defaultsTo: '-',
+    },
+
+    details: {
+      type: 'string',
+      defaultsTo: '-',
+    },
+
+    bankName: {
+      type: 'string',
+      defaultsTo: '-',
+    },
+
+    bankAddress: {
+      type: 'string',
+      defaultsTo: '-',
+    },
+
+    bankSwiftCode: {
+      type: 'string',
+      defaultsTo: '-',
     },
 
     accountType: {
