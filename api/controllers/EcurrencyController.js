@@ -81,6 +81,7 @@ module.exports = {
 
     const eCurrency = await Ecurrency.update({id: params.id, isArchived: false}, {
       title: params.title,
+      reserves: params.reserves,
       buyCommissions: params.buyCommissions,
       sellCommissions: params.sellCommissions,
       exchangeCommissions: params.exchangeCommissions,

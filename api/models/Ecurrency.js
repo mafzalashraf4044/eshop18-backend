@@ -15,6 +15,11 @@ module.exports = {
       unique: true,
     },
 
+    reserves: {
+      type: 'string',
+      required: true,
+    },
+
     buyCommissions: {
       type: 'json',
       required: true
