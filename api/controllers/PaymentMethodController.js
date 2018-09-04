@@ -82,6 +82,7 @@ module.exports = {
 
     const paymentMethod = await PaymentMethod.update({id: params.id, isArchived: false}, {
       title: params.title,
+      isBankingEnabled: params.isBankingEnabled,
     }).intercept((err) => {
       return err;
     }).fetch();
@@ -115,6 +116,33 @@ module.exports = {
       return res.status(200).json({details: 'Payment method deleted successfully.'});
     }
     
+  },
+
+  updateIsBankingEnabled: async (req, res) => {
+    /**
+     * Params:
+     * - isVerified (req)
+     * - id (req, query param)
+     */
+
+    sails.log('UsersController:: updateIsBankingEnabled called');
+
+    const params = req.allParams();
+
+    if (_.isUndefined(params.isBankingEnabled)) {
+      return res.json(400, {
+        details: 'Field isBankingEnabled is required.'
+      });
+    }
+
+    const user = await PaymentMethod.update({id: params.id}, {
+      isBankingEnabled: params.isBankingEnabled,
+    }).intercept((err) => {
+      return err;
+    }).fetch();
+
+    return res.status(200).json({user: _.head(user)});
+
   },
 
 };

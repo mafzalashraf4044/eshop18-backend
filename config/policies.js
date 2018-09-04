@@ -47,6 +47,8 @@ module.exports.policies = {
 
     getUserAccounts: 'isAuthenticatedCustomer',
     createUserAccount: 'isAuthenticatedCustomer',
+    editUserAccount: 'isAuthenticatedCustomer',
+    deleteUserAccount: 'isAuthenticatedCustomer',
   },
 
   EcurrencyController: {
@@ -72,6 +74,7 @@ module.exports.policies = {
     createPaymentMethod: 'isAuthenticatedAdmin',
     updatePaymentMethod: 'isAuthenticatedAdmin',
     deletePaymentMethod: 'isAuthenticatedAdmin',
+    updateIsBankingEnabled: 'isAuthenticatedAdmin',
   },
 
   NewsController: {

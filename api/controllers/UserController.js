@@ -287,6 +287,8 @@ module.exports = {
    });
 
    const accounts = await Account.find({owner: params.id})
+   .populate('eCurrency')
+   .populate('paymentMethod')
    .intercept((err) => {
     return err;
    });
@@ -377,7 +379,7 @@ module.exports = {
 
     const params = req.allParams();
 
-    if (params.password) {
+    if (params.password || params.email) {
       return res.json(400, {details: 'Invalid arguments provided.'});
     }
 
@@ -386,8 +388,6 @@ module.exports = {
       return res.json(400, {details: 'First name is invalid.'});
     } else if (params.lastName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.lastName)) {
       return res.json(400, {details: 'Last name is invalid.'});
-    } else if (params.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email)) {
-      return res.json(400, {details: 'Email is invalid.'});
     } else if (params.username && !/^[a-zA-Z0-9][a-zA-Z0-9]+[a-zA-Z0-9]$/.test(params.username)) {
       return res.json(400, {details: 'Username is invalid.'});
     }
@@ -396,11 +396,10 @@ module.exports = {
       firstName: params.firstName,
       lastName: params.lastName,
       username: params.username,
-      email: params.email,
       country: params.country,
       contactNumber: params.contactNumber,
     }).intercept('E_UNIQUE', (err)=> {
-      return 'Email or username already exists.';
+      return 'Username already exists.';
     }).intercept((err) => {
       return err;
     }).fetch();

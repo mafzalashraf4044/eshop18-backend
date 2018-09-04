@@ -15,6 +15,11 @@ module.exports = {
       unique: true,
     },
 
+    isBankingEnabled: {
+      type: 'boolean',
+      defaultsTo: false,
+    },
+
     isArchived: {
       type: 'boolean',
       defaultsTo: false

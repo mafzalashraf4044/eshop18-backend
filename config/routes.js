@@ -65,6 +65,7 @@ module.exports.routes = {
   'POST /paymentmethod': 'PaymentMethodController.createPaymentMethod',
   'PATCH /paymentmethod/:id': 'PaymentMethodController.updatePaymentMethod',
   'DELETE /paymentmethod/:id': 'PaymentMethodController.deletePaymentMethod',
+  'POST /update-is-banking-enabled/:id': 'PaymentMethodController.updateIsBankingEnabled',
 
   'GET /ecurrency': 'EcurrencyController.getECurrencies',
   'POST /ecurrency': 'EcurrencyController.createECurrency',
@@ -86,5 +87,7 @@ module.exports.routes = {
   'DELETE /account/:id': 'AccountController.deleteAccount',
   'GET /user-account': 'AccountController.getUserAccounts',
   'POST /user-account': 'AccountController.createUserAccount',
+  'PATCH /user-account/:id': 'AccountController.editUserAccount',
+  'DELETE /user-account/:id': 'AccountController.deleteUserAccount',
 
 };
