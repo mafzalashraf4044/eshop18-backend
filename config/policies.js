@@ -64,6 +64,7 @@ module.exports.policies = {
     updateOrder: 'isAuthenticatedAdmin',
     deleteOrder: 'isAuthenticatedAdmin',
     updateOrderStatus: 'isAuthenticatedAdmin',
+    getUserDetailsFromOrder: 'isAuthenticatedAdmin',
 
     placeOrder: 'isAuthenticatedCustomer',
     getUserOrders: 'isAuthenticatedCustomer',
@@ -82,6 +83,11 @@ module.exports.policies = {
     createNews: 'isAuthenticatedAdmin',
     updateNews: 'isAuthenticatedAdmin',
     deleteNews: 'isAuthenticatedAdmin',
+  },
+
+  ConfigController: {
+    getConfig: true,
+    createOrUpdateConfig: 'isAuthenticatedAdmin',
   },
 
 };

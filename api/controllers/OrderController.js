@@ -229,10 +229,126 @@ module.exports = {
 
       const secondAmount = parseFloat(params.firstAmount) + parseFloat(commissionAmount);
 
+      let to = null;
+      let from = null;
+      let sentFrom = null;
+      let receivedIn = null;
+      let fromAccount = null;
+      let toAccount = null;
+
+      if (params.type === 'buy') {
+        to = eCurrency;
+        from = await PaymentMethod.findOne({title: params.from})
+        .intercept((err) => {
+          return err;
+        });
+
+        fromAccount = await Account.findOne({paymentMethod: from.id})
+        .intercept((err) => {
+          return err;
+        });
+
+        toAccount = await Account.findOne({eCurrency: to.id})
+        .intercept((err) => {
+          return err;
+        });
+
+        if (!fromAccount || !toAccount) {
+          return res.status(400).json({details: `There is no ${!fromAccount ? from.title : to.title} account associated with your profile, kindly add an account and then place your order again.`});
+        }
+
+        sentFrom = {
+          model: 'paymentMethod',
+          id: from.id,
+          title: from.title,
+          accountId:  fromAccount.id,
+        };
+        
+        receivedIn = {
+          model: 'eCurrency',
+          id: to.id,
+          title: to.title,
+          accountId:  toAccount.id,
+        };
+
+      } else if (params.type === 'sell') {
+        
+        from = eCurrency;
+        to = await PaymentMethod.findOne({title: params.to})
+        .intercept((err) => {
+          return err;
+        });        
+
+        fromAccount = await Account.findOne({eCurrency: from.id})
+        .intercept((err) => {
+          return err;
+        });
+
+        toAccount = await Account.findOne({paymentMethod: to.id})
+        .intercept((err) => {
+          return err;
+        });
+
+        if (!fromAccount || !toAccount) {
+          return res.status(400).json({details: `There is no ${!fromAccount ? from.title : to.title} account associated with your profile, kindly add an account and then place your order again.`});
+        }
+
+        sentFrom = {
+          model: 'eCurrency',
+          id: from.id,
+          title: from.title,
+          accountId:  fromAccount.id,
+        };
+        
+        receivedIn = {
+          model: 'paymentMethod',
+          id: to.id,
+          title: to.title,
+          accountId:  toAccount.id,
+        };
+
+      } else if (params.type === 'exchange') {
+
+        from = eCurrency;
+        to = await Ecurrency.findOne({title: params.to})
+        .intercept((err) => {
+          return err;
+        });
+
+        fromAccount = await Account.findOne({eCurrency: from.id})
+        .intercept((err) => {
+          return err;
+        });
+
+        toAccount = await Account.findOne({eCurrency: to.id})
+        .intercept((err) => {
+          return err;
+        });
+
+        if (!fromAccount || !toAccount) {
+          return res.status(400).json({details: `There is no ${!fromAccount ? from.title : to.title} account associated with your profile, kindly add an account and then place your order again.`});
+        }
+
+        sentFrom = {
+          model: 'eCurrency',
+          id: from.id,
+          title: from.title,
+          accountId:  fromAccount.id,
+        };
+        
+        receivedIn = {
+          model: 'eCurrency',
+          id: to.id,
+          title: to.title,
+          accountId:  toAccount.id,
+        };
+
+      }
+      
       const order = await Order.create({
-        sentFrom: params.from,
+        sentFrom,
         amountSent: params.firstAmount,
-        receivedIn: params.to,
+        receivedIn,
         amountReceived: secondAmount,
         user: req.user.id,
         type: params.type,
@@ -248,7 +364,7 @@ module.exports = {
   
       const mailOptions = {
         from: 'support@ebuyexchange.com', // sender address
-        to: user.email, // list of receivers
+        to: req.user.email, // list of receivers
         subject: 'eBuyExhcange: Order Confirmation', // Subject line
         html: "<p>Your order has been placed successfully.</p>"
       };
@@ -263,7 +379,7 @@ module.exports = {
       return res.status(200).json({order});
     }
     
-    return res.status(400).json({details: 'Provided parameters are invaid.'});      
+    return res.status(400).json({details: 'Provided parameters are invaid.'}); 
   },
 
   getUserOrders: async (req, res) => {
@@ -280,6 +396,46 @@ module.exports = {
     sails.log('orders', orders)
 
     return res.status(200).json({orders});
-  }
+  },
+
+  getUserDetailsFromOrder: async (req, res) => {
+    /**
+     * Params:
+     * - id (req, query param)
+    */
+
+    sails.log('OrderController::getUserDetailsFromOrder called');
+
+    const params = req.allParams();
+    
+    const criteria = {where: {isArchived: false, id: params.id}};
+
+    let order = await Order.findOne(criteria)
+    .populate('user')
+    .intercept((err) => {
+      return err;
+    });
+
+    sails.log('user', order)
+
+    const sentFromAccount = await Account.findOne({owner: order.user.id, id: order.sentFrom.accountId})
+    .populate(order.sentFrom.model)
+    .intercept((err) => {
+      return err;
+    });
+
+    const receivedInAccount = await Account.findOne({owner: order.user.id, id: order.receivedIn.accountId})
+    .populate(order.receivedIn.model)
+    .intercept((err) => {
+      return err;
+    });
+
+    return res.status(200).json({userDetails: {
+      user: order.user,
+      sentFromAccount,
+      receivedInAccount,
+    }});
+  },
+
 };
 

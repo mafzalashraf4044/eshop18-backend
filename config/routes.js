@@ -80,6 +80,7 @@ module.exports.routes = {
   'POST /currency-calculator': 'OrderController.currencyCalculator',
   'POST /place-order': 'OrderController.placeOrder',
   'GET /user-orders': 'OrderController.getUserOrders',
+  'GET /user-details-from-order/:id': 'OrderController.getUserDetailsFromOrder',
 
   'GET /account': 'AccountController.getAccounts',
   'POST /account': 'AccountController.createAccount',
@@ -90,4 +91,6 @@ module.exports.routes = {
   'PATCH /user-account/:id': 'AccountController.editUserAccount',
   'DELETE /user-account/:id': 'AccountController.deleteUserAccount',
 
+  'GET /config': 'AccountController.getConfig',
+  'POST /config': 'AccountController.createOrUpdateConfig',
 };

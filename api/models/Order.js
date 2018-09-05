@@ -10,7 +10,7 @@ module.exports = {
   attributes: {
 
     sentFrom: {
-      type: 'string',
+      type: 'json',
       required: true,
     },
 
@@ -20,7 +20,7 @@ module.exports = {
     },
 
     receivedIn: {
-      type: 'string',
+      type: 'json',
       required: true,
     },
 
