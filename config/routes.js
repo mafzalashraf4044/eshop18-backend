@@ -61,6 +61,11 @@ module.exports.routes = {
   'PATCH /news/:id': 'NewsController.updateNews',
   'DELETE /news/:id': 'NewsController.deleteNews',
 
+  'GET /review': 'ReviewController.getReviews',
+  'POST /review': 'ReviewController.createReview',
+  'PATCH /review/:id': 'ReviewController.updateReview',
+  'DELETE /review/:id': 'ReviewController.deleteReview',
+
   'GET /paymentmethod': 'PaymentMethodController.getPaymentMethods',
   'POST /paymentmethod': 'PaymentMethodController.createPaymentMethod',
   'PATCH /paymentmethod/:id': 'PaymentMethodController.updatePaymentMethod',

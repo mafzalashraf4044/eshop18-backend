@@ -85,6 +85,13 @@ module.exports.policies = {
     deleteNews: 'isAuthenticatedAdmin',
   },
 
+  ReviewController: {
+    getReviews: true,
+    createReview: 'isAuthenticatedAdmin',
+    updateReview: 'isAuthenticatedAdmin',
+    deleteReview: 'isAuthenticatedAdmin',
+  },
+
   ConfigController: {
     getConfigUser: 'isAuthenticatedCustomer',
     getConfigAdmin: 'isAuthenticatedAdmin',
