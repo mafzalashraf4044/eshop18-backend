@@ -244,11 +244,15 @@ module.exports = {
         });
 
         fromAccount = await Account.findOne({paymentMethod: from.id})
+        .populate('eCurrency')
+        .populate('paymentMethod')
         .intercept((err) => {
           return err;
         });
 
         toAccount = await Account.findOne({eCurrency: to.id})
+        .populate('eCurrency')
+        .populate('paymentMethod')
         .intercept((err) => {
           return err;
         });
@@ -280,11 +284,15 @@ module.exports = {
         });        
 
         fromAccount = await Account.findOne({eCurrency: from.id})
+        .populate('eCurrency')
+        .populate('paymentMethod')
         .intercept((err) => {
           return err;
         });
 
         toAccount = await Account.findOne({paymentMethod: to.id})
+        .populate('eCurrency')
+        .populate('paymentMethod')
         .intercept((err) => {
           return err;
         });
@@ -316,11 +324,15 @@ module.exports = {
         });
 
         fromAccount = await Account.findOne({eCurrency: from.id})
+        .populate('eCurrency')
+        .populate('paymentMethod')
         .intercept((err) => {
           return err;
         });
 
         toAccount = await Account.findOne({eCurrency: to.id})
+        .populate('eCurrency')
+        .populate('paymentMethod')
         .intercept((err) => {
           return err;
         });
@@ -342,9 +354,8 @@ module.exports = {
           title: to.title,
           accountId:  toAccount.id,
         };
-
       }
-      
+
       const order = await Order.create({
         sentFrom,
         amountSent: params.firstAmount,
@@ -357,20 +368,136 @@ module.exports = {
         return err;
       }).fetch();
 
+      const config = _.head(await Config.find().limit(1)
+      .intercept((err) => {
+        return err;
+      }));
+      
       const transporter = nodemailer.createTransport({
         service: 'gmail',
-        auth: {user: 'muhammadafzal3303@gmail.com', pass: 'ebuyexchange-testing'}
+        auth: {user: config.emailAddress, pass: config.emailPwd}
       });
   
-      const mailOptions = {
-        from: 'support@ebuyexchange.com', // sender address
+      transporter.sendMail({
+        from: config.emailAddress, // sender address
         to: req.user.email, // list of receivers
-        subject: 'eBuyExhcange: Order Confirmation', // Subject line
-        html: "<p>Your order has been placed successfully.</p>"
-      };
-  
-      transporter.sendMail(mailOptions, function (err, info) {
-        if(err)
+        subject: 'eBUYexchange: Order Placed Successfully', // Subject line
+        html: `
+          <div>Hi ${req.user.firstName} ${req.user.lastName},</div>
+          <br />
+          <div>Your order has been successfully placed, kindly check the following details about your order, our representative will soon contact you by email for further procedure.</div>
+          <br />
+          <div><b>ORDER DETAILS</b></div>
+          <div><b>ID:</b> ${order.id}</div>
+          <div><b>Order Type:</b> ${order.type.toUpperCase()}</div>
+          <div><b>Sent From:</b> ${order.sentFrom.title}</div>
+          <div><b>Amount Sent:</b> $${order.amountSent}</div>
+          <div><b>Received In:</b> ${order.receivedIn.title}</div>
+          <div><b>Amount Received:</b> $${order.amountReceived}</div>
+
+          <br />
+          <div><b>ACCOUNT DETAILS (Sent from account)</b></div>
+          <div><b>ID:</b> ${fromAccount.id}</div>
+          <div><b>First Name:</b> ${fromAccount.firstName ? fromAccount.firstName : '-'}</div>
+          <div><b>Last Name:</b> ${fromAccount.lastName ? fromAccount.lastName : '-'}</div>
+          <div><b>Acc. Name:</b> ${fromAccount.accountName ? fromAccount.accountName : '-'}</div>
+          <div><b>Acc. #:</b> ${fromAccount.accountNum ? fromAccount.accountNum : '-'}</div>
+          <div><b>Details:</b> ${fromAccount.details ? fromAccount.details : '-'}</div>
+          <div><b>Payment Method:</b> ${fromAccount.paymentMethod ? fromAccount.paymentMethod.title : '-'}</div>
+          <div><b>E Currency:</b> ${fromAccount.eCurrency ? fromAccount.eCurrency.title : '-'}</div>
+          <div><b>Bank Name:</b> ${fromAccount.bankName ? fromAccount.bankName : '-'}</div>
+          <div><b>Bank Address:</b> ${fromAccount.bankAddress ? fromAccount.bankAddress : '-'}</div>
+          <div><b>Swift Code:</b> ${fromAccount.bankSwiftCode ? fromAccount.bankSwiftCode: '-'}</div>
+
+          <br />
+          <div><b>ACCOUNT DETAILS (Received in account)</b></div>
+          <div><b>ID:</b> $toAccountid}</div>
+          <div><b>First Name:</b> ${toAccount.firstName ? toAccount.firstName : '-'}</div>
+          <div><b>Last Name:</b> ${toAccount.lastName ? toAccount.lastName : '-'}</div>
+          <div><b>Acc. Name:</b> ${toAccount.accountName ? toAccount.accountName : '-'}</div>
+          <div><b>Acc. #:</b> ${toAccount.accountNum ? toAccount.accountNum : '-'}</div>
+          <div><b>Details:</b> ${toAccount.details ? toAccount.details : '-'}</div>
+          <div><b>Payment Method:</b> ${toAccount.paymentMethod ? toAccount.paymentMethod.title : '-'}</div>
+          <div><b>E Currency:</b> ${toAccount.eCurrency ? toAccount.eCurrency.title : '-'}</div>
+          <div><b>Bank Name:</b> ${toAccount.bankName ? toAccount.bankName : '-'}</div>
+          <div><b>Bank Address:</b> ${toAccount.bankAddress ? toAccount.bankAddress : '-'}</div>
+          <div><b>Swift Code:</b> ${toAccount.bankSwiftCode ? toAccount.bankSwiftCode: '-'}</div>
+
+          <br />
+          <div><b>CONTACT DETAILS</b></div>
+          <div><b>Email:</b> ${req.user.email}</div>
+          <div><b>Contact Number:</b> ${req.user.contactNumber}</div>
+
+          <br />
+          <div>Thank you.</div>
+          `,
+      }, (err, info) => {
+        if (err)
+          sails.log(err)
+        else
+          sails.log(info);
+      });
+
+      transporter.sendMail({
+        from: config.emailAddress, // sender address
+        to: config.emailAddress, // list of receivers
+        subject: 'eBUYexchange: New Order Placed', // Subject line
+        html: `
+          <div>Hi Admin,</div>
+          <br />
+          <div>A new order has been placed, for further information kindly check ${sails.config.globals.adminURL}.</div>
+          <br />
+          <div><b>ORDER DETAILS</b></div>
+          <div><b>ID:</b> ${order.id}</div>
+          <div><b>Order Type:</b> ${order.type.toUpperCase()}</div>
+          <div><b>Sent From:</b> ${order.sentFrom.title}</div>
+          <div><b>Amount Sent:</b> $${order.amountSent}</div>
+          <div><b>Received In:</b> ${order.receivedIn.title}</div>
+          <div><b>Amount Received:</b> $${order.amountReceived}</div>
+
+          <br />
+          <div><b>ACCOUNT DETAILS (Sent from account)</b></div>
+          <div><b>ID:</b> ${fromAccount.id}</div>
+          <div><b>First Name:</b> ${fromAccount.firstName ? fromAccount.firstName : '-'}</div>
+          <div><b>Last Name:</b> ${fromAccount.lastName ? fromAccount.lastName : '-'}</div>
+          <div><b>Acc. Name:</b> ${fromAccount.accountName ? fromAccount.accountName : '-'}</div>
+          <div><b>Acc. #:</b> ${fromAccount.accountNum ? fromAccount.accountNum : '-'}</div>
+          <div><b>Details:</b> ${fromAccount.details ? fromAccount.details : '-'}</div>
+          <div><b>Payment Method:</b> ${fromAccount.paymentMethod ? fromAccount.paymentMethod.title : '-'}</div>
+          <div><b>E Currency:</b> ${fromAccount.eCurrency ? fromAccount.eCurrency.title : '-'}</div>
+          <div><b>Bank Name:</b> ${fromAccount.bankName ? fromAccount.bankName : '-'}</div>
+          <div><b>Bank Address:</b> ${fromAccount.bankAddress ? fromAccount.bankAddress : '-'}</div>
+          <div><b>Swift Code:</b> ${fromAccount.bankSwiftCode ? fromAccount.bankSwiftCode: '-'}</div>
+
+          <br />
+          <div><b>ACCOUNT DETAILS (Received in account)</b></div>
+          <div><b>ID:</b> $toAccountid}</div>
+          <div><b>First Name:</b> ${toAccount.firstName ? toAccount.firstName : '-'}</div>
+          <div><b>Last Name:</b> ${toAccount.lastName ? toAccount.lastName : '-'}</div>
+          <div><b>Acc. Name:</b> ${toAccount.accountName ? toAccount.accountName : '-'}</div>
+          <div><b>Acc. #:</b> ${toAccount.accountNum ? toAccount.accountNum : '-'}</div>
+          <div><b>Details:</b> ${toAccount.details ? toAccount.details : '-'}</div>
+          <div><b>Payment Method:</b> ${toAccount.paymentMethod ? toAccount.paymentMethod.title : '-'}</div>
+          <div><b>E Currency:</b> ${toAccount.eCurrency ? toAccount.eCurrency.title : '-'}</div>
+          <div><b>Bank Name:</b> ${toAccount.bankName ? toAccount.bankName : '-'}</div>
+          <div><b>Bank Address:</b> ${toAccount.bankAddress ? toAccount.bankAddress : '-'}</div>
+          <div><b>Swift Code:</b> ${toAccount.bankSwiftCode ? toAccount.bankSwiftCode: '-'}</div>
+
+          <br />
+          <div><b>USER DETAILS</b></div>
+          <div><b>ID:</b> ${req.user.id}</div>
+          <div><b>First Name:</b> ${req.user.firstName}</div>
+          <div><b>Last Name:</b> ${req.user.lastName}</div>
+          <div><b>Email:</b> ${req.user.email}</div>
+          <div><b>Username:</b> ${req.user.username}</div>
+          <div><b>Country:</b> ${req.user.country}</div>
+          <div><b>Contact Number:</b> ${req.user.contactNumber}</div>
+
+          <br />
+          <div>Thank you.</div>
+          `,
+      }, (err, info) => {
+        if (err)
           sails.log(err)
         else
           sails.log(info);
@@ -393,8 +520,6 @@ module.exports = {
       return err;
     });
 
-    sails.log('orders', orders)
-
     return res.status(200).json({orders});
   },
 
@@ -415,8 +540,6 @@ module.exports = {
     .intercept((err) => {
       return err;
     });
-
-    sails.log('user', order)
 
     const sentFromAccount = await Account.findOne({owner: order.user.id, id: order.sentFrom.accountId})
     .populate(order.sentFrom.model)

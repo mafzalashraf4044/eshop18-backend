@@ -7,24 +7,33 @@
 
 module.exports = {
   
-  getConfig: async (req, res) => {
+  getConfigUser: async (req, res) => {
 
-    sails.log('ConfigController::getConfig called');
+    sails.log('ConfigController::getConfigUser called');
 
     const params = req.allParams();
-    
-    const criteria = {where: {isArchived: false}};
+
+    const config = await Config.find().limit(1)
+    .intercept((err) => {
+      return err;
+    });
+
+    return res.status(200).json({config: _.omit(_.head(config), ['emailAddress', 'emailPwd'])});
+
+  },
+
+  getConfigAdmin: async (req, res) => {
+
+    sails.log('ConfigController::getConfigAdmin called');
+
+    const params = req.allParams();
 
     let config = await Config.find().limit(1)
     .intercept((err) => {
       return err;
     });
 
-    if (req.user.role === '__costumer') {
-      config = _.omit(this, ['emailAddress', 'emailPwd']);
-    }
-
-    return res.status(200).json({config});
+    return res.status(200).json({config: _.head(config)});
 
   },
 

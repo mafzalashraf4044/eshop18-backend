@@ -11,6 +11,9 @@
 
 module.exports.globals = {
 
+  siteURL: 'http://23.254.131.71:4000', 
+  adminURL: 'admin.ebuyexchange.com', 
+
   /****************************************************************************
   *                                                                           *
   * Whether to expose the locally-installed Lodash as a global variable       *

@@ -86,7 +86,8 @@ module.exports.policies = {
   },
 
   ConfigController: {
-    getConfig: true,
+    getConfigUser: 'isAuthenticatedCustomer',
+    getConfigAdmin: 'isAuthenticatedAdmin',
     createOrUpdateConfig: 'isAuthenticatedAdmin',
   },
 

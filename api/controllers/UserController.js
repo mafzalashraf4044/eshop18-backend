@@ -341,20 +341,57 @@ module.exports = {
       return err;
     }).fetch();
 
+    const config = _.head(await Config.find().limit(1)
+    .intercept((err) => {
+      return err;
+    }));
+    
     const transporter = nodemailer.createTransport({
       service: 'gmail',
-      auth: {user: 'muhammadafzal3303@gmail.com', pass: 'ebuyexchange-testing'}
+      auth: {user: config.emailAddress, pass: config.emailPwd}
     });
 
-    const mailOptions = {
-      from: 'support@ebuyexchange.com', // sender address
+    transporter.sendMail({
+      from: config.emailAddress, // sender address
       to: user.email, // list of receivers
-      subject: 'eBuyExhcange: Verify Your Account', // Subject line
-      html: "<p>Click on the link bellow to verify your account.</p> <a href='http://23.254.131.71:4000?hash=" + emailVerifyHash + "&id=" + user.id + "'>Verify your account.</a>"
-    };
+      subject: 'eBUYexchange: Verify Your Account', // Subject line
+      html: `
+        <div>Hi ${user.firstName} ${user.lastName},</div>
+        <br />
+        <div>Welcome to eBUYexchange.com, your account has been successfully registered, kindly click on the given link to verify you account: <a href="${sails.config.globals.siteURL}?hash=${emailVerifyHash}&id=${user.id}">Verify you account.</a></div>
+        <br />
+        <div>Thank you.</div>
+        `,
+    }, (err, info) => {
+      if (err)
+        sails.log(err)
+      else
+        sails.log(info);
+    });
 
-    transporter.sendMail(mailOptions, function (err, info) {
-      if(err)
+    transporter.sendMail({
+      from: config.emailAddress, // sender address
+      to: config.emailAddress, // list of receivers
+      subject: 'eBUYexchange: New User Registered', // Subject line
+      html: `
+        <div>Hi Admin,</div>
+        <br />
+        <div>A new user just registered to eBUYexchange.com with the following credentials:</div>
+        <br />
+        <div><b>ID:</b> ${user.id}</div>
+        <div><b>First Name:</b> ${user.firstName}</div>
+        <div><b>Last Name:</b> ${user.lastName}</div>
+        <div><b>Email:</b> ${user.email}</div>
+        <div><b>Username:</b> ${user.username}</div>
+        <div><b>Country:</b> ${user.country}</div>
+        <div><b>Contact Number:</b> ${user.contactNumber}</div>
+        <br />
+        <div>Kinldy check ${sails.config.globals.adminURL} for further details.</div>
+        <br />
+        <div>Thank you.</div>
+      `,
+    }, (err, info) => {
+      if (err)
         sails.log(err)
       else
         sails.log(info);

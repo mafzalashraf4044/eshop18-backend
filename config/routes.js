@@ -37,7 +37,7 @@ module.exports.routes = {
   * is matched against "shadow routes" (e.g. blueprint routes).  If it does  *
   * not match any of those, it is matched against static assets.             *
   *                                                                          *
-  ******************************************************or*********************/
+  ***************************************************************************/
 
   'POST /login': 'AuthController.login',
   'GET /logout': 'AuthController.logout',
@@ -91,6 +91,7 @@ module.exports.routes = {
   'PATCH /user-account/:id': 'AccountController.editUserAccount',
   'DELETE /user-account/:id': 'AccountController.deleteUserAccount',
 
-  'GET /config': 'AccountController.getConfig',
-  'POST /config': 'AccountController.createOrUpdateConfig',
+  'GET /config-user': 'ConfigController.getConfigUser',
+  'GET /config-admin': 'ConfigController.getConfigAdmin',
+  'POST /config': 'ConfigController.createOrUpdateConfig',
 };
