@@ -374,10 +374,14 @@ module.exports = {
       }));
       
       const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: '199.79.62.8',
+        port: 25,
+        secure: true,
         auth: {user: config.emailAddress, pass: config.emailPwd}
       });
   
+      console.log('transporter', transporter);
+      
       transporter.sendMail({
         from: config.emailAddress, // sender address
         to: req.user.email, // list of receivers
@@ -432,6 +436,10 @@ module.exports = {
           <div>Thank you.</div>
           `,
       }, (err, info) => {
+        console.log('info', info);
+
+        console.log('err', err);
+        
         if (err)
           sails.log(err)
         else

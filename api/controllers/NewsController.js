@@ -47,12 +47,8 @@ module.exports = {
       const startDate = moment();
       const endDate = moment().subtract(30, 'days');
   
-      sails.log('startData', startDate)
-
       criteria.where.createdAt = {'>=': endDate, '<=': startDate};
     }
-
-    sails.log(criteria)
 
     const news = await News.find(criteria)
     .intercept((err) => {

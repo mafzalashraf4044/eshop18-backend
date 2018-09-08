@@ -50,7 +50,7 @@ module.exports = {
       criteria.where.createdAt = {'>=': endDate, '<=': startDate};
     }
 
-    const reviews = await Reviews.find(criteria)
+    const reviews = await Review.find(criteria)
     .intercept((err) => {
       return err;
     });
