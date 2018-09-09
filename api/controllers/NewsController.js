@@ -44,8 +44,8 @@ module.exports = {
     }
 
     if (params.latest === 'true') {
-      const startDate = moment();
-      const endDate = moment().subtract(30, 'days');
+      const startDate = moment().valueOf();
+      const endDate = moment().subtract(30, 'days').valueOf();
   
       criteria.where.createdAt = {'>=': endDate, '<=': startDate};
     }
