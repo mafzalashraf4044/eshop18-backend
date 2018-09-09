@@ -14,7 +14,7 @@ module.exports = {
       required: true,
     },
 
-    amountSent: {
+    firstAmount: {
       type: 'number',
       defaultsTo: 0,
     },
@@ -24,7 +24,7 @@ module.exports = {
       required: true,
     },
 
-    amountReceived: {
+    secondAmount: {
       type: 'number',
       defaultsTo: 0,
     },

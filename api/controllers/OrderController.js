@@ -69,9 +69,9 @@ module.exports = {
      * Params:
      * - country (req)
      * - sentFrom (req)
-     * - amountSent (req)
+     * - firstAmount (req)
      * - receivedIn (req)
-     * - amountReceived (req)
+     * - secondAmount (req)
      * - user (req)
      * - type (req)
      * - status
@@ -95,9 +95,9 @@ module.exports = {
      * Params:
      * - id (req, query param)
      * - sentFrom (req)
-     * - amountSent (req)
+     * - firstAmount (req)
      * - receivedIn (req)
-     * - amountReceived (req)
+     * - secondAmount (req)
      * - user (req)
      * - type (req)
      * - status
@@ -191,7 +191,7 @@ module.exports = {
       const commissionAmount = ((parseFloat(params.firstAmount) * parseFloat(commission.percentage)) / 100) + parseFloat(commission.fixed);
       const serviceCharges =  `${commission.percentage.toString()}% + ${commission.fixed.toString()} = ${commissionAmount.toFixed(2)}`;
 
-      const secondAmount = parseFloat(params.firstAmount) + parseFloat(commissionAmount);
+      const secondAmount = params.type === 'buy' ? parseFloat(params.firstAmount) + parseFloat(commissionAmount) : parseFloat(params.firstAmount) - parseFloat(commissionAmount);
       return res.status(200).json({serviceCharges, secondAmount: secondAmount.toFixed(2)});
     }
     
@@ -227,7 +227,7 @@ module.exports = {
       const commissionAmount = ((parseFloat(params.firstAmount) * parseFloat(commission.percentage)) / 100) + parseFloat(commission.fixed);
       const serviceCharges =  `${commission.percentage.toString()}% + ${commission.fixed.toString()} = ${commissionAmount.toFixed(2)}`;
 
-      const secondAmount = parseFloat(params.firstAmount) + parseFloat(commissionAmount);
+      const secondAmount = params.type === 'buy' ? parseFloat(params.firstAmount) + parseFloat(commissionAmount) : parseFloat(params.firstAmount) - parseFloat(commissionAmount);
 
       let to = null;
       let from = null;
@@ -358,9 +358,9 @@ module.exports = {
 
       const order = await Order.create({
         sentFrom,
-        amountSent: params.firstAmount,
+        firstAmount: params.firstAmount,
         receivedIn,
-        amountReceived: secondAmount,
+        secondAmount: secondAmount,
         user: req.user.id,
         type: params.type,
       })
@@ -391,9 +391,9 @@ module.exports = {
           <div><b>ID:</b> ${order.id}</div>
           <div><b>Order Type:</b> ${order.type.toUpperCase()}</div>
           <div><b>Sent From:</b> ${order.sentFrom.title}</div>
-          <div><b>Amount Sent:</b> $${order.amountSent}</div>
           <div><b>Received In:</b> ${order.receivedIn.title}</div>
-          <div><b>Amount Received:</b> $${order.amountReceived}</div>
+          <div><b>Amount:</b> $${order.firstAmount}</div>
+          <div><b>Amount after Service Charges:</b> $${order.secondAmount}</div>
 
           <br />
           <div><b>ACCOUNT DETAILS (Sent from account)</b></div>
@@ -411,7 +411,7 @@ module.exports = {
 
           <br />
           <div><b>ACCOUNT DETAILS (Received in account)</b></div>
-          <div><b>ID:</b> ${toAccountid}</div>
+          <div><b>ID:</b> ${toAccount.id}</div>
           <div><b>First Name:</b> ${toAccount.firstName ? toAccount.firstName : '-'}</div>
           <div><b>Last Name:</b> ${toAccount.lastName ? toAccount.lastName : '-'}</div>
           <div><b>Acc. Name:</b> ${toAccount.accountName ? toAccount.accountName : '-'}</div>
@@ -451,9 +451,9 @@ module.exports = {
           <div><b>ID:</b> ${order.id}</div>
           <div><b>Order Type:</b> ${order.type.toUpperCase()}</div>
           <div><b>Sent From:</b> ${order.sentFrom.title}</div>
-          <div><b>Amount Sent:</b> $${order.amountSent}</div>
           <div><b>Received In:</b> ${order.receivedIn.title}</div>
-          <div><b>Amount Received:</b> $${order.amountReceived}</div>
+          <div><b>Amount:</b> $${order.firstAmount}</div>
+          <div><b>Amount after Service Charges:</b> $${order.secondAmount}</div>
 
           <br />
           <div><b>ACCOUNT DETAILS (Sent from account)</b></div>
@@ -471,7 +471,7 @@ module.exports = {
 
           <br />
           <div><b>ACCOUNT DETAILS (Received in account)</b></div>
-          <div><b>ID:</b> ${toAccountid}</div>
+          <div><b>ID:</b> ${toAccount.id}</div>
           <div><b>First Name:</b> ${toAccount.firstName ? toAccount.firstName : '-'}</div>
           <div><b>Last Name:</b> ${toAccount.lastName ? toAccount.lastName : '-'}</div>
           <div><b>Acc. Name:</b> ${toAccount.accountName ? toAccount.accountName : '-'}</div>
