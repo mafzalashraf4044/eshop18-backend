@@ -215,7 +215,7 @@ module.exports = {
       return res.status(400).json({details: 'Provided parameters are invaid.'});     
     }
 
-    const eCurrency = await Ecurrency.findOne({title: params.type === 'buy' ? params.to : params.from})
+    const eCurrency = await Ecurrency.findOne({title: params.type === 'buy' ? params.to : params.from, isArchived: false})
     .intercept((err) => {
       return err;
     });
@@ -238,19 +238,19 @@ module.exports = {
 
       if (params.type === 'buy') {
         to = eCurrency;
-        from = await PaymentMethod.findOne({title: params.from})
+        from = await PaymentMethod.findOne({title: params.from, isArchived: false})
         .intercept((err) => {
           return err;
         });
 
-        fromAccount = await Account.findOne({paymentMethod: from.id})
+        fromAccount = await Account.findOne({paymentMethod: from.id, isArchived: false, owner: req.user.id})
         .populate('eCurrency')
         .populate('paymentMethod')
         .intercept((err) => {
           return err;
         });
 
-        toAccount = await Account.findOne({eCurrency: to.id})
+        toAccount = await Account.findOne({eCurrency: to.id, isArchived: false, owner: req.user.id})
         .populate('eCurrency')
         .populate('paymentMethod')
         .intercept((err) => {
@@ -278,19 +278,19 @@ module.exports = {
       } else if (params.type === 'sell') {
         
         from = eCurrency;
-        to = await PaymentMethod.findOne({title: params.to})
+        to = await PaymentMethod.findOne({title: params.to, isArchived: false})
         .intercept((err) => {
           return err;
         });        
 
-        fromAccount = await Account.findOne({eCurrency: from.id})
+        fromAccount = await Account.findOne({eCurrency: from.id, isArchived: false, owner: req.user.id})
         .populate('eCurrency')
         .populate('paymentMethod')
         .intercept((err) => {
           return err;
         });
 
-        toAccount = await Account.findOne({paymentMethod: to.id})
+        toAccount = await Account.findOne({paymentMethod: to.id, isArchived: false, owner: req.user.id})
         .populate('eCurrency')
         .populate('paymentMethod')
         .intercept((err) => {
@@ -318,19 +318,19 @@ module.exports = {
       } else if (params.type === 'exchange') {
 
         from = eCurrency;
-        to = await Ecurrency.findOne({title: params.to})
+        to = await Ecurrency.findOne({title: params.to, isArchived: false})
         .intercept((err) => {
           return err;
         });
 
-        fromAccount = await Account.findOne({eCurrency: from.id})
+        fromAccount = await Account.findOne({eCurrency: from.id, isArchived: false, owner: req.user.id})
         .populate('eCurrency')
         .populate('paymentMethod')
         .intercept((err) => {
           return err;
         });
 
-        toAccount = await Account.findOne({eCurrency: to.id})
+        toAccount = await Account.findOne({eCurrency: to.id, isArchived: false, owner: req.user.id})
         .populate('eCurrency')
         .populate('paymentMethod')
         .intercept((err) => {
@@ -411,7 +411,7 @@ module.exports = {
 
           <br />
           <div><b>ACCOUNT DETAILS (Received in account)</b></div>
-          <div><b>ID:</b> $toAccountid}</div>
+          <div><b>ID:</b> ${toAccountid}</div>
           <div><b>First Name:</b> ${toAccount.firstName ? toAccount.firstName : '-'}</div>
           <div><b>Last Name:</b> ${toAccount.lastName ? toAccount.lastName : '-'}</div>
           <div><b>Acc. Name:</b> ${toAccount.accountName ? toAccount.accountName : '-'}</div>
@@ -471,7 +471,7 @@ module.exports = {
 
           <br />
           <div><b>ACCOUNT DETAILS (Received in account)</b></div>
-          <div><b>ID:</b> $toAccountid}</div>
+          <div><b>ID:</b> ${toAccountid}</div>
           <div><b>First Name:</b> ${toAccount.firstName ? toAccount.firstName : '-'}</div>
           <div><b>Last Name:</b> ${toAccount.lastName ? toAccount.lastName : '-'}</div>
           <div><b>Acc. Name:</b> ${toAccount.accountName ? toAccount.accountName : '-'}</div>

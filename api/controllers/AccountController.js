@@ -201,6 +201,15 @@ module.exports = {
       return res.status(400).json({details: 'Invalid parameters.'});
     }
 
+    const accounts = await Account.find({isArchived: false, ...accountModel})
+    .intercept((err) => {
+      return err;
+    });
+
+    if (accounts.length > 0) {
+      return res.status(400).json({details: `An account with this ${params.accountType === 'paymentmethod' ? 'payment method' : 'e-currency'} already exists.`});
+    }
+
     let account = await Account.create({
       ...accountModel,
       owner: req.user.id,
