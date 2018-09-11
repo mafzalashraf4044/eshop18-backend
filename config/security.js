@@ -30,7 +30,7 @@ module.exports.security = {
 
   cors: {
     allRoutes: true,
-    allowOrigins: ['http://localhost:3000', 'http://localhost:4000', 'http://23.254.131.71', 'http://23.254.131.71:3000'],
+    allowOrigins: ['http://localhost:3000', 'http://localhost:4000', 'http://23.254.131.71:3000', 'http://www.ebuyexchange.com'],
     allowCredentials: false,
     allowRequestHeaders: 'Authorization, x-requested-with, Content-Type'
   },
