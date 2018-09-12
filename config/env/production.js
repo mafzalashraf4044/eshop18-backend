@@ -148,9 +148,10 @@ module.exports = {
     *                                                                          *
     ***************************************************************************/
     cors: {
-      // allowOrigins: [
-      //   'https://example.com',
-      // ]
+      allRoutes: true,
+      allowOrigins: ['http://localhost:3000', 'http://localhost:4000', 'http://23.254.131.71:3000', 'http://ebuyexchange.com'],
+      allowCredentials: false,
+      allowRequestHeaders: 'Authorization, x-requested-with, Content-Type'
     },
 
   },

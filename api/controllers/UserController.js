@@ -209,21 +209,28 @@ module.exports = {
       return res.json(400, {
         details: 'Field emailVerifyHash is required.'
       });
-    }
+    } 
 
     const user = await User.findOne({id: params.id}).intercept((err) => {
       return err;
     });
 
+    if (user.isEmailVerified) {
+      return res.status(200).json({details: "This email is already verified, kindly enter you credentials to login."});
+    }
+
     if (user.emailVerifyHash === params.emailVerifyHash) {
       await User.update({id: params.id, isArchived: false, role: '__customer'}, {
+        emailVerifyHash: '',
         isEmailVerified: true,
       }).intercept((err) => {
         return err;
       });
+
+      return res.status(200).json({details: "Email verified successfully, enter your credentials to login."});
     }
 
-    return res.status(200).json({details: "User email verified successfully."});
+    return res.status(400).json({details: "User email can not be verfied."});
 
   },
 
@@ -322,6 +329,8 @@ module.exports = {
       return res.json(400, {details: 'Email is invalid.'});
     } else if (params.username && !/^[a-zA-Z0-9][a-zA-Z0-9]+[a-zA-Z0-9]$/.test(params.username)) {
       return res.json(400, {details: 'Username is invalid.'});
+    } else if (params.password && params.password.length < 8) {
+      return res.json(400, {details: 'Password must be atleast 8 charachters long.'});
     }
 
     const current_date = (new Date()).valueOf().toString();
