@@ -27,7 +27,7 @@ module.exports = {
     const params = req.allParams();
     
     const criteria = {where: {isArchived: false, type: params.type}};
-    const fields = ['_id' ,'country', 'sentFrom', 'receivedIn', 'status'];
+    const fields = ['_id' ,'country', 'sentFrom', 'receivedIn', 'status', 'firstAmount', 'secondAmount'];
 
     //  search query
     if (params.searchTerm) {
@@ -74,15 +74,20 @@ module.exports = {
      * - secondAmount (req)
      * - user (req)
      * - type (req)
-     * - status
-     * - action
     */
 
     sails.log('OrderController:: createOrder called');
 
     const params = req.allParams();
 
-    const order = await Order.create(params)
+    const order = await Order.create({
+      sentFrom: params.sentFrom,
+      firstAmount: params.firstAmount,
+      receivedIn: params.receivedIn,
+      secondAmount: params.secondAmount,
+      user: params.user,
+      type: params.type,
+    })
     .intercept((err) => {
       return err;
     }).fetch();
@@ -107,7 +112,13 @@ module.exports = {
 
     const params = req.allParams();
 
-    const order = await Order.update({id: params.id, isArchived: false}, params).intercept((err) => {
+    const order = await Order.update({id: params.id, isArchived: false}, {
+      sentFrom: params.sentFrom,
+      firstAmount: params.firstAmount,
+      receivedIn: params.receivedIn,
+      secondAmount: params.secondAmount,
+      type: params.type,
+    }).intercept((err) => {
       return err;
     }).fetch();
 
@@ -373,14 +384,11 @@ module.exports = {
         return err;
       }));
       
-      console.log({user: config.emailAddress, pass: config.emailPwd});
-
       const transporter = nodemailer.createTransport({
-        host: '199.79.62.8',
-        port: 25,
-        auth: {user: config.emailAddress, pass: config.emailPwd}
+        service: 'gmail',
+        auth: {user: 'muhammadafzal3303@gmail.com', pass: 'ebuyexchange-testing'}
       });
-  
+
       transporter.sendMail({
         from: `Admin <${config.emailAddress}>`, // sender address
         to: req.user.email, // list of receivers

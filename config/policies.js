@@ -66,6 +66,7 @@ module.exports.policies = {
     updateOrderStatus: 'isAdmin',
     getUserDetailsFromOrder: 'isAdmin',
 
+    currencyCalculator: true,
     placeOrder: 'isAuthenticated',
     getUserOrders: 'isAuthenticated',
   },
