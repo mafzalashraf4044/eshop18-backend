@@ -52,7 +52,7 @@ module.exports = {
     }
 
     //  sorting
-    if ((params.sortType === 'ASC' || params.sortType === 'DESC') && (params.sortBy && fields.indexOf(params.sortBy) !== -1)) {
+    if ((params.sortType === 'ASC' || params.sortType === 'DESC') && params.sortBy) {
       criteria.sort = `${params.sortBy} ${params.sortType}`;
     }
 
@@ -373,13 +373,16 @@ module.exports = {
         return err;
       }));
       
+      console.log({user: config.emailAddress, pass: config.emailPwd});
+
       const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: '199.79.62.8',
+        port: 25,
         auth: {user: config.emailAddress, pass: config.emailPwd}
       });
   
       transporter.sendMail({
-        from: config.emailAddress, // sender address
+        from: `Admin <${config.emailAddress}>`, // sender address
         to: req.user.email, // list of receivers
         subject: 'eBUYexchange: Order Placed Successfully', // Subject line
         html: `

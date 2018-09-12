@@ -39,7 +39,7 @@ module.exports = {
     }
 
     //  sorting
-    if ((params.sortType === 'ASC' || params.sortType === 'DESC') && (params.sortBy && fields.indexOf(params.sortBy) !== -1)) {
+    if ((params.sortType === 'ASC' || params.sortType === 'DESC') && params.sortBy) {
       criteria.sort = `${params.sortBy} ${params.sortType}`;
     }
 
