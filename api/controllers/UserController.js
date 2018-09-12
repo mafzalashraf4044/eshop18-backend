@@ -87,7 +87,15 @@ module.exports = {
       return res.json(400, {details: 'Username is invalid.'});
     }
 
-    const user = await User.create(params)
+    const user = await User.create({
+      firstName: params.firstName,
+      lastName: params.lastName,
+      username: params.username,
+      email: params.email,
+      password: params.password,
+      country: params.country,
+      contactNumber: params.contactNumber,
+    })
     .intercept('E_UNIQUE', (err)=> {
       return 'Email or username already exists.';
     }).intercept((err) => {
@@ -113,17 +121,11 @@ module.exports = {
 
     const params = req.allParams();
 
-    if (params.password) {
-      return res.json(400, {details: 'Invalid arguments provided.'});
-    }
-
     //  Feilds Pattern Validation
     if (params.firstName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.firstName)) {
       return res.json(400, {details: 'First name is invalid.'});
     } else if (params.lastName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.lastName)) {
       return res.json(400, {details: 'Last name is invalid.'});
-    } else if (params.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email)) {
-      return res.json(400, {details: 'Email is invalid.'});
     } else if (params.username && !/^[a-zA-Z0-9][a-zA-Z0-9]+[a-zA-Z0-9]$/.test(params.username)) {
       return res.json(400, {details: 'Username is invalid.'});
     }
@@ -132,7 +134,6 @@ module.exports = {
       firstName: params.firstName,
       lastName: params.lastName,
       username: params.username,
-      email: params.email,
       country: params.country,
       contactNumber: params.contactNumber,
     }).intercept('E_UNIQUE', (err)=> {
@@ -154,7 +155,7 @@ module.exports = {
 
     const params = req.allParams();
 
-    const user = await User.update({id: params.id, isArchived: false}, {
+    const user = await User.update({id: params.id, isArchived: false, role: '__customer'}, {
       isArchived: true,
     }).intercept((err) => {
       return err;
@@ -180,12 +181,10 @@ module.exports = {
     const params = req.allParams();
 
     if (_.isUndefined(params.isVerified)) {
-      return res.json(400, {
-        details: 'Field isVerified is required.'
-      });
+      return res.json(400, {details: 'Field isVerified is required.'});
     }
 
-    const user = await User.update({id: params.id}, {
+    const user = await User.update({id: params.id, isArchived: false, role: '__customer'}, {
       isVerified: params.isVerified,
     }).intercept((err) => {
       return err;
@@ -217,7 +216,7 @@ module.exports = {
     });
 
     if (user.emailVerifyHash === params.emailVerifyHash) {
-      await User.update({id: params.id}, {
+      await User.update({id: params.id, isArchived: false, role: '__customer'}, {
         isEmailVerified: true,
       }).intercept((err) => {
         return err;
@@ -240,12 +239,8 @@ module.exports = {
 
     const params = req.allParams();
 
-    sails.log(params)
-
-    if (!params.subject || !params.content || !params.emails || params.emails.length === 0) {
-      return res.json(400, {
-        details: 'Invalid parameters.'
-      });
+    if (_.isUndefined(params.subject) || _.isUndefined(params.content) || _.isUndefined(params.subject) || _.isUndefined(params.emails) || (params.email && params.email.length === 0)) {
+      return res.json(400, {details: 'Invalid arguments provided.'});
     }
 
     const transporter = nodemailer.createTransport({
@@ -310,7 +305,6 @@ module.exports = {
 
     sails.log('UsersController:: registerUser called');
 
-    const saltRounds = 10;
     const params = req.allParams();
     
     /**
@@ -334,7 +328,16 @@ module.exports = {
     const random = Math.random().toString();
     const emailVerifyHash = crypto.createHash('sha1').update(current_date + random).digest('hex');
 
-    const user = await User.create({...params, emailVerifyHash})
+    const user = await User.create({
+      emailVerifyHash,
+      firstName: params.firstName,
+      lastName: params.lastName,
+      username: params.username,
+      email: params.email,
+      password: params.password,
+      country: params.country,
+      contactNumber: params.contactNumber,
+    })
     .intercept('E_UNIQUE', (err)=> {
       return 'Email or username already exists.';
     }).intercept((err) => {
@@ -416,10 +419,6 @@ module.exports = {
 
     const params = req.allParams();
 
-    if (params.password || params.email) {
-      return res.json(400, {details: 'Invalid arguments provided.'});
-    }
-
     //  Feilds Pattern Validation
     if (params.firstName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.firstName)) {
       return res.json(400, {details: 'First name is invalid.'});
@@ -458,10 +457,10 @@ module.exports = {
 
     //  Feilds Pattern Validation
     if (!params.oldPwd || !params.newPwd) {
-      return res.json(400, {details: 'Some fields are invalid.'});
+      return res.json(400, {details: 'Invalid arguments provided.'});
     } 
 
-    let user = await User.findOne({id: params.id, isArchived: false})
+    let user = await User.findOne({id: params.id, isArchived: false, role: '__customer'})
     .intercept((err) => {
       return err;
     });
