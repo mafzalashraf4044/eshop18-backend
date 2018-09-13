@@ -384,63 +384,66 @@ module.exports = {
         return err;
       }));
       
+      // sails.log({user: config.emailAddress, pass: config.emailPwd});
+
+      // const transporter = nodemailer.createTransport({
+      //   host: 'us2.mx1.mailhostbox.com',
+      //   port: 465,
+      //   auth: {user: config.emailAddress, pass: config.emailPwd},
+      // });
+      const createdAt = new Date(order.createdAt);
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {user: 'muhammadafzal3303@gmail.com', pass: 'ebuyexchange-testing'}
       });
 
       transporter.sendMail({
-        from: `Admin <${config.emailAddress}>`, // sender address
+        from: `eBUYexchange <${config.emailAddress}>`, // sender address
         to: req.user.email, // list of receivers
         subject: 'eBUYexchange: Order Placed Successfully', // Subject line
         html: `
-          <div>Hi ${req.user.firstName} ${req.user.lastName},</div>
+          <div>Dear ${req.user.firstName} ${req.user.lastName},</div>
           <br />
-          <div>Your order has been successfully placed, kindly check the following details about your order, our representative will soon contact you by email for further procedure.</div>
+          <div>Thank you for placing order at www.ebuyexchange.com, your order details are as follows:</div>
           <br />
-          <div><b>ORDER DETAILS</b></div>
-          <div><b>ID:</b> ${order.id}</div>
-          <div><b>Order Type:</b> ${order.type.toUpperCase()}</div>
-          <div><b>Sent From:</b> ${order.sentFrom.title}</div>
-          <div><b>Received In:</b> ${order.receivedIn.title}</div>
-          <div><b>Amount:</b> $${order.firstAmount}</div>
-          <div><b>Amount after Service Charges:</b> $${order.secondAmount}</div>
-
-          <br />
-          <div><b>ACCOUNT DETAILS (Sent from account)</b></div>
-          <div><b>ID:</b> ${fromAccount.id}</div>
-          <div><b>First Name:</b> ${fromAccount.firstName ? fromAccount.firstName : '-'}</div>
-          <div><b>Last Name:</b> ${fromAccount.lastName ? fromAccount.lastName : '-'}</div>
-          <div><b>Acc. Name:</b> ${fromAccount.accountName ? fromAccount.accountName : '-'}</div>
-          <div><b>Acc. #:</b> ${fromAccount.accountNum ? fromAccount.accountNum : '-'}</div>
-          <div><b>Details:</b> ${fromAccount.details ? fromAccount.details : '-'}</div>
-          <div><b>Payment Method:</b> ${fromAccount.paymentMethod ? fromAccount.paymentMethod.title : '-'}</div>
-          <div><b>E Currency:</b> ${fromAccount.eCurrency ? fromAccount.eCurrency.title : '-'}</div>
-          <div><b>Bank Name:</b> ${fromAccount.bankName ? fromAccount.bankName : '-'}</div>
-          <div><b>Bank Address:</b> ${fromAccount.bankAddress ? fromAccount.bankAddress : '-'}</div>
-          <div><b>Swift Code:</b> ${fromAccount.bankSwiftCode ? fromAccount.bankSwiftCode: '-'}</div>
-
-          <br />
-          <div><b>ACCOUNT DETAILS (Received in account)</b></div>
-          <div><b>ID:</b> ${toAccount.id}</div>
-          <div><b>First Name:</b> ${toAccount.firstName ? toAccount.firstName : '-'}</div>
-          <div><b>Last Name:</b> ${toAccount.lastName ? toAccount.lastName : '-'}</div>
-          <div><b>Acc. Name:</b> ${toAccount.accountName ? toAccount.accountName : '-'}</div>
-          <div><b>Acc. #:</b> ${toAccount.accountNum ? toAccount.accountNum : '-'}</div>
-          <div><b>Details:</b> ${toAccount.details ? toAccount.details : '-'}</div>
-          <div><b>Payment Method:</b> ${toAccount.paymentMethod ? toAccount.paymentMethod.title : '-'}</div>
-          <div><b>E Currency:</b> ${toAccount.eCurrency ? toAccount.eCurrency.title : '-'}</div>
-          <div><b>Bank Name:</b> ${toAccount.bankName ? toAccount.bankName : '-'}</div>
-          <div><b>Bank Address:</b> ${toAccount.bankAddress ? toAccount.bankAddress : '-'}</div>
-          <div><b>Swift Code:</b> ${toAccount.bankSwiftCode ? toAccount.bankSwiftCode: '-'}</div>
-
-          <br />
-          <div><b>CONTACT DETAILS</b></div>
+          <div><b>Order No:</b> ${order.id}</div>
           <div><b>Email:</b> ${req.user.email}</div>
-          <div><b>Contact Number:</b> ${req.user.contactNumber}</div>
+          <div><b>Order Date:</b> ${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}</div>
+
+          ${order.type === 'buy' ? `<div><b>Buy Amount:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
+          ${order.type === 'buy' ? `<div><b>Payment By:</b> ${order.sentFrom.title}</div>`: ''}
+          ${order.type === 'buy' ? `<div><b>Service Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
+          ${order.type === 'buy' ? `<div><b>Have to send:</b> USD ${parseFloat(order.secondAmount).toFixed(2)}</div>`: ''}
+          ${order.type === 'buy' ? `<div><b>Delivery to:</b> ${toAccount.accountNum} (${toAccount.accountName})</div>`: ''}
+
+          ${order.type === 'sell' ? `<div><b>Have to send:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.sentFrom.title})</div>`: ''}
+          ${order.type === 'sell' ? `<div><b>Payment received through:</b> ${order.receivedIn.title}</div>`: ''}
+          ${order.type === 'sell' ? `<div><b>Service Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
+          ${order.type === 'sell' ? `<div><b>Receivable Amount:</b> USD ${parseFloat(order.secondAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
+          ${order.type === 'sell' ? `<br /><div>You will receive the amount in the following account:</div><br />`: ''}
+
+          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Account Name:</b> ${toAccount.accountName}</div>`: ''}
+          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Account Number:</b> ${toAccount.accountNum}</div>`: ''}
+          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Bank Name:</b> ${toAccount.bankName}</div>`: ''}
+          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Bank Address:</b> ${toAccount.bankAddress}</div>`: ''}
+          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Bank Swift Code:</b> ${toAccount.bankSwiftCode}</div>`: ''}
+
+          ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>First Name:</b> ${toAccount.firstName}</div>`: ''}
+          ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Last Name:</b> ${toAccount.lastName}</div>`: ''}
+          ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>City, State, Country, Post Code:</b> ${toAccount.details}</div>`: ''}
+
+          ${order.type === 'exchange' ? `<div><b>Receivable Amount:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
+          ${order.type === 'exchange' ? `<div><b>Exchange Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
+          ${order.type === 'exchange' ? `<div><b>Have to send:</b> USD ${parseFloat(order.secondAmount).toFixed(2)} (${order.sentFrom.title})</div>`: ''}
+          ${order.type === 'exchange' ? `<div><b>Delivery to:</b> ${toAccount.accountNum} (${toAccount.accountName})</div>`: ''}
 
           <br />
-          <div>Thank you.</div>
+
+          <div>You will receive further details in our next email.</div>
+
+          <br />
+          <div>Thanks for using our service.</div>
+          <div>Best Wishes &lt;admin ${config.emailAddress}&gt;</div>
           `,
       }, (err, info) => {
         if (err)
@@ -458,51 +461,35 @@ module.exports = {
           <br />
           <div>A new order has been placed, for further information kindly check ${sails.config.globals.adminURL}.</div>
           <br />
-          <div><b>ORDER DETAILS</b></div>
-          <div><b>ID:</b> ${order.id}</div>
-          <div><b>Order Type:</b> ${order.type.toUpperCase()}</div>
-          <div><b>Sent From:</b> ${order.sentFrom.title}</div>
-          <div><b>Received In:</b> ${order.receivedIn.title}</div>
-          <div><b>Amount:</b> $${order.firstAmount}</div>
-          <div><b>Amount after Service Charges:</b> $${order.secondAmount}</div>
-
-          <br />
-          <div><b>ACCOUNT DETAILS (Sent from account)</b></div>
-          <div><b>ID:</b> ${fromAccount.id}</div>
-          <div><b>First Name:</b> ${fromAccount.firstName ? fromAccount.firstName : '-'}</div>
-          <div><b>Last Name:</b> ${fromAccount.lastName ? fromAccount.lastName : '-'}</div>
-          <div><b>Acc. Name:</b> ${fromAccount.accountName ? fromAccount.accountName : '-'}</div>
-          <div><b>Acc. #:</b> ${fromAccount.accountNum ? fromAccount.accountNum : '-'}</div>
-          <div><b>Details:</b> ${fromAccount.details ? fromAccount.details : '-'}</div>
-          <div><b>Payment Method:</b> ${fromAccount.paymentMethod ? fromAccount.paymentMethod.title : '-'}</div>
-          <div><b>E Currency:</b> ${fromAccount.eCurrency ? fromAccount.eCurrency.title : '-'}</div>
-          <div><b>Bank Name:</b> ${fromAccount.bankName ? fromAccount.bankName : '-'}</div>
-          <div><b>Bank Address:</b> ${fromAccount.bankAddress ? fromAccount.bankAddress : '-'}</div>
-          <div><b>Swift Code:</b> ${fromAccount.bankSwiftCode ? fromAccount.bankSwiftCode: '-'}</div>
-
-          <br />
-          <div><b>ACCOUNT DETAILS (Received in account)</b></div>
-          <div><b>ID:</b> ${toAccount.id}</div>
-          <div><b>First Name:</b> ${toAccount.firstName ? toAccount.firstName : '-'}</div>
-          <div><b>Last Name:</b> ${toAccount.lastName ? toAccount.lastName : '-'}</div>
-          <div><b>Acc. Name:</b> ${toAccount.accountName ? toAccount.accountName : '-'}</div>
-          <div><b>Acc. #:</b> ${toAccount.accountNum ? toAccount.accountNum : '-'}</div>
-          <div><b>Details:</b> ${toAccount.details ? toAccount.details : '-'}</div>
-          <div><b>Payment Method:</b> ${toAccount.paymentMethod ? toAccount.paymentMethod.title : '-'}</div>
-          <div><b>E Currency:</b> ${toAccount.eCurrency ? toAccount.eCurrency.title : '-'}</div>
-          <div><b>Bank Name:</b> ${toAccount.bankName ? toAccount.bankName : '-'}</div>
-          <div><b>Bank Address:</b> ${toAccount.bankAddress ? toAccount.bankAddress : '-'}</div>
-          <div><b>Swift Code:</b> ${toAccount.bankSwiftCode ? toAccount.bankSwiftCode: '-'}</div>
-
-          <br />
-          <div><b>USER DETAILS</b></div>
-          <div><b>ID:</b> ${req.user.id}</div>
-          <div><b>First Name:</b> ${req.user.firstName}</div>
-          <div><b>Last Name:</b> ${req.user.lastName}</div>
           <div><b>Email:</b> ${req.user.email}</div>
-          <div><b>Username:</b> ${req.user.username}</div>
-          <div><b>Country:</b> ${req.user.country}</div>
-          <div><b>Contact Number:</b> ${req.user.contactNumber}</div>
+          <div><b>Order Date:</b> ${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}</div>
+
+          ${order.type === 'buy' ? `<div><b>Buy Amount:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
+          ${order.type === 'buy' ? `<div><b>Payment By:</b> ${order.sentFrom.title}</div>`: ''}
+          ${order.type === 'buy' ? `<div><b>Service Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
+          ${order.type === 'buy' ? `<div><b>Have to send:</b> USD ${parseFloat(order.secondAmount).toFixed(2)}</div>`: ''}
+          ${order.type === 'buy' ? `<div><b>Delivery to:</b> ${toAccount.accountNum} (${toAccount.accountName})</div>`: ''}
+
+          ${order.type === 'sell' ? `<div><b>Have to send:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.sentFrom.title})</div>`: ''}
+          ${order.type === 'sell' ? `<div><b>Payment received through:</b> ${order.receivedIn.title}</div>`: ''}
+          ${order.type === 'sell' ? `<div><b>Service Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
+          ${order.type === 'sell' ? `<div><b>Receivable Amount:</b> USD ${parseFloat(order.secondAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
+          ${order.type === 'sell' ? `<br /><div>You will receive the amount in the following account:</div><br />`: ''}
+
+          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Account Name:</b> ${toAccount.accountName}</div>`: ''}
+          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Account Number:</b> ${toAccount.accountNum}</div>`: ''}
+          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Bank Name:</b> ${toAccount.bankName}</div>`: ''}
+          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Bank Address:</b> ${toAccount.bankAddress}</div>`: ''}
+          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Bank Swift Code:</b> ${toAccount.bankSwiftCode}</div>`: ''}
+
+          ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>First Name:</b> ${toAccount.firstName}</div>`: ''}
+          ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Last Name:</b> ${toAccount.lastName}</div>`: ''}
+          ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>City, State, Country, Post Code:</b> ${toAccount.details}</div>`: ''}
+
+          ${order.type === 'exchange' ? `<div><b>Receivable Amount:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
+          ${order.type === 'exchange' ? `<div><b>Exchange Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
+          ${order.type === 'exchange' ? `<div><b>Have to send:</b> USD ${parseFloat(order.secondAmount).toFixed(2)} (${order.sentFrom.title})</div>`: ''}
+          ${order.type === 'exchange' ? `<div><b>Delivery to:</b> ${toAccount.accountNum} (${toAccount.accountName})</div>`: ''}
 
           <br />
           <div>Thank you.</div>
