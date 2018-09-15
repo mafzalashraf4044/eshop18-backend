@@ -250,9 +250,20 @@ module.exports = {
       return res.json(400, {details: 'Invalid arguments provided.'});
     }
 
+    const config = _.head(await Config.find().limit(1)
+    .intercept((err) => {
+      return err;
+    }));
+    
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {user: 'muhammadafzal3303@gmail.com', pass: 'ebuyexchange-testing'}
+      host: 'smtp.ebuyexchange.com',
+      port: 587,
+      secure: false,
+      tls: {
+        // do not fail on invalid certs
+        rejectUnauthorized: false
+      },
+      auth: {user: config.emailAddress, pass: config.emailPwd},
     });
 
     const mailOptions = {
@@ -359,10 +370,16 @@ module.exports = {
     }));
     
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {user: config.emailAddress, pass: config.emailPwd}
+      host: 'smtp.ebuyexchange.com',
+      port: 587,
+      secure: false,
+      tls: {
+        // do not fail on invalid certs
+        rejectUnauthorized: false
+      },
+      auth: {user: config.emailAddress, pass: config.emailPwd},
     });
-
+    
     transporter.sendMail({
       from: config.emailAddress, // sender address
       to: user.email, // list of receivers

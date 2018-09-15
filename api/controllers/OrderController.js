@@ -384,19 +384,18 @@ module.exports = {
         return err;
       }));
       
-      // sails.log({user: config.emailAddress, pass: config.emailPwd});
-
-      // const transporter = nodemailer.createTransport({
-      //   host: 'us2.mx1.mailhostbox.com',
-      //   port: 465,
-      //   auth: {user: config.emailAddress, pass: config.emailPwd},
-      // });
-      const createdAt = new Date(order.createdAt);
       const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {user: 'muhammadafzal3303@gmail.com', pass: 'ebuyexchange-testing'}
+        host: 'smtp.ebuyexchange.com',
+        port: 587,
+        secure: false,
+        tls: {
+          // do not fail on invalid certs
+          rejectUnauthorized: false
+        },
+        auth: {user: config.emailAddress, pass: config.emailPwd},
       });
-
+      
+      const createdAt = new Date(order.createdAt);
       transporter.sendMail({
         from: `eBUYexchange <${config.emailAddress}>`, // sender address
         to: req.user.email, // list of receivers
@@ -452,54 +451,54 @@ module.exports = {
           sails.log(info);
       });
 
-      transporter.sendMail({
-        from: config.emailAddress, // sender address
-        to: config.emailAddress, // list of receivers
-        subject: 'eBUYexchange: New Order Placed', // Subject line
-        html: `
-          <div>Hi Admin,</div>
-          <br />
-          <div>A new order has been placed, for further information kindly check ${sails.config.globals.adminURL}.</div>
-          <br />
-          <div><b>Email:</b> ${req.user.email}</div>
-          <div><b>Order Date:</b> ${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}</div>
+      // transporter.sendMail({
+      //   from: config.emailAddress, // sender address
+      //   to: config.emailAddress, // list of receivers
+      //   subject: 'eBUYexchange: New Order Placed', // Subject line
+      //   html: `
+      //     <div>Hi Admin,</div>
+      //     <br />
+      //     <div>A new order has been placed, for further information kindly check ${sails.config.globals.adminURL}.</div>
+      //     <br />
+      //     <div><b>Email:</b> ${req.user.email}</div>
+      //     <div><b>Order Date:</b> ${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}</div>
 
-          ${order.type === 'buy' ? `<div><b>Buy Amount:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
-          ${order.type === 'buy' ? `<div><b>Payment By:</b> ${order.sentFrom.title}</div>`: ''}
-          ${order.type === 'buy' ? `<div><b>Service Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
-          ${order.type === 'buy' ? `<div><b>Have to send:</b> USD ${parseFloat(order.secondAmount).toFixed(2)}</div>`: ''}
-          ${order.type === 'buy' ? `<div><b>Delivery to:</b> ${toAccount.accountNum} (${toAccount.accountName})</div>`: ''}
+      //     ${order.type === 'buy' ? `<div><b>Buy Amount:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
+      //     ${order.type === 'buy' ? `<div><b>Payment By:</b> ${order.sentFrom.title}</div>`: ''}
+      //     ${order.type === 'buy' ? `<div><b>Service Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
+      //     ${order.type === 'buy' ? `<div><b>Have to send:</b> USD ${parseFloat(order.secondAmount).toFixed(2)}</div>`: ''}
+      //     ${order.type === 'buy' ? `<div><b>Delivery to:</b> ${toAccount.accountNum} (${toAccount.accountName})</div>`: ''}
 
-          ${order.type === 'sell' ? `<div><b>Have to send:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.sentFrom.title})</div>`: ''}
-          ${order.type === 'sell' ? `<div><b>Payment received through:</b> ${order.receivedIn.title}</div>`: ''}
-          ${order.type === 'sell' ? `<div><b>Service Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
-          ${order.type === 'sell' ? `<div><b>Receivable Amount:</b> USD ${parseFloat(order.secondAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
-          ${order.type === 'sell' ? `<br /><div>You will receive the amount in the following account:</div><br />`: ''}
+      //     ${order.type === 'sell' ? `<div><b>Have to send:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.sentFrom.title})</div>`: ''}
+      //     ${order.type === 'sell' ? `<div><b>Payment received through:</b> ${order.receivedIn.title}</div>`: ''}
+      //     ${order.type === 'sell' ? `<div><b>Service Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
+      //     ${order.type === 'sell' ? `<div><b>Receivable Amount:</b> USD ${parseFloat(order.secondAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
+      //     ${order.type === 'sell' ? `<br /><div>You will receive the amount in the following account:</div><br />`: ''}
 
-          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Account Name:</b> ${toAccount.accountName}</div>`: ''}
-          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Account Number:</b> ${toAccount.accountNum}</div>`: ''}
-          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Bank Name:</b> ${toAccount.bankName}</div>`: ''}
-          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Bank Address:</b> ${toAccount.bankAddress}</div>`: ''}
-          ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Bank Swift Code:</b> ${toAccount.bankSwiftCode}</div>`: ''}
+      //     ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Account Name:</b> ${toAccount.accountName}</div>`: ''}
+      //     ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Account Number:</b> ${toAccount.accountNum}</div>`: ''}
+      //     ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Bank Name:</b> ${toAccount.bankName}</div>`: ''}
+      //     ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Bank Address:</b> ${toAccount.bankAddress}</div>`: ''}
+      //     ${(order.type === 'sell' && toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Bank Swift Code:</b> ${toAccount.bankSwiftCode}</div>`: ''}
 
-          ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>First Name:</b> ${toAccount.firstName}</div>`: ''}
-          ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Last Name:</b> ${toAccount.lastName}</div>`: ''}
-          ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>City, State, Country, Post Code:</b> ${toAccount.details}</div>`: ''}
+      //     ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>First Name:</b> ${toAccount.firstName}</div>`: ''}
+      //     ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Last Name:</b> ${toAccount.lastName}</div>`: ''}
+      //     ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>City, State, Country, Post Code:</b> ${toAccount.details}</div>`: ''}
 
-          ${order.type === 'exchange' ? `<div><b>Receivable Amount:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
-          ${order.type === 'exchange' ? `<div><b>Exchange Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
-          ${order.type === 'exchange' ? `<div><b>Have to send:</b> USD ${parseFloat(order.secondAmount).toFixed(2)} (${order.sentFrom.title})</div>`: ''}
-          ${order.type === 'exchange' ? `<div><b>Delivery to:</b> ${toAccount.accountNum} (${toAccount.accountName})</div>`: ''}
+      //     ${order.type === 'exchange' ? `<div><b>Receivable Amount:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
+      //     ${order.type === 'exchange' ? `<div><b>Exchange Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
+      //     ${order.type === 'exchange' ? `<div><b>Have to send:</b> USD ${parseFloat(order.secondAmount).toFixed(2)} (${order.sentFrom.title})</div>`: ''}
+      //     ${order.type === 'exchange' ? `<div><b>Delivery to:</b> ${toAccount.accountNum} (${toAccount.accountName})</div>`: ''}
 
-          <br />
-          <div>Thank you.</div>
-          `,
-      }, (err, info) => {
-        if (err)
-          sails.log(err)
-        else
-          sails.log(info);
-      });
+      //     <br />
+      //     <div>Thank you.</div>
+      //     `,
+      // }, (err, info) => {
+      //   if (err)
+      //     sails.log(err)
+      //   else
+      //     sails.log(info);
+      // });
 
       return res.status(200).json({order});
     }
