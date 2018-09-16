@@ -12,6 +12,13 @@ const jwt = require('jsonwebtoken');
 module.exports = {
 
   login: function (req, res) {
+
+    const params = req.allParams();
+    
+    if (!params.email || !params.password) {
+      return res.json(400, {details: 'Invalid credentials.'});
+    }
+
     passport.authenticate('local', {
       session: false
     }, (err, user, details) => {

@@ -91,6 +91,11 @@ module.exports = {
       defaultsTo: '',
     },
 
+    forgotPwdHash: {
+      type: 'string',
+      defaultsTo: '',
+    },
+
     isArchived: {
       type: 'boolean',
       defaultsTo: false

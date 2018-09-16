@@ -54,7 +54,9 @@ module.exports.routes = {
   'GET /get-user-orders-and-accounts/:id': 'UserController.getUserOrdersAndAccounts',
   'POST /register-user': 'UserController.registerUser',
   'PATCH /edit-profile/:id': 'UserController.editProfile',
-  'PATCH /change-password/:id': 'UserController.changePassword',
+  'POST /change-password/:id': 'UserController.changePassword',
+  'POST /forgot-password': 'UserController.forgotPwd',
+  'POST /reset-password/:id': 'UserController.resetPassword',
 
   'GET /news': 'NewsController.getNews',
   'POST /news': 'NewsController.createNews',

@@ -387,7 +387,7 @@ module.exports = {
       html: `
         <div>Hi ${user.firstName} ${user.lastName},</div>
         <br />
-        <div>Welcome to eBUYexchange.com, your account has been successfully registered, kindly click on the given link to verify you account: <a href="${sails.config.globals.siteURL}?hash=${emailVerifyHash}&id=${user.id}">Verify you account.</a></div>
+        <div>Welcome to eBUYexchange.com, your account has been successfully registered, kindly click on the given link to verify you account: <a href="${sails.config.globals.siteURL}?emailVerifyHash=${emailVerifyHash}&id=${user.id}">Verify you account.</a></div>
         <br />
         <div>Thank you.</div>
         `,
@@ -411,6 +411,7 @@ module.exports = {
         <div><b>First Name:</b> ${user.firstName}</div>
         <div><b>Last Name:</b> ${user.lastName}</div>
         <div><b>Email:</b> ${user.email}</div>
+        <div><b>IP:</b> ${req.connection.remoteAddress}</div>
         <div><b>Username:</b> ${user.username}</div>
         <div><b>Country:</b> ${user.country}</div>
         <div><b>Contact Number:</b> ${user.contactNumber}</div>
@@ -509,5 +510,114 @@ module.exports = {
 
 
     return res.status(200).json({user});
+  },
+
+  forgotPwd: async (req, res) => {
+    /**
+     * Params:
+     * - email (req)
+     */
+
+    sails.log('UsersController:: forgotPwd called');
+
+    const params = req.allParams();
+
+    if (_.isUndefined(params.email)) {
+      return res.json(400, {
+        details: 'Field email is required.'
+      });
+    } 
+
+    const current_date = (new Date()).valueOf().toString();
+    const random = Math.random().toString();
+    const forgotPwdHash = crypto.createHash('sha1').update(current_date + random).digest('hex');
+
+    const user = await User.findOne({email: params.email, isArchived: false, isEmailVerified: true, role: '__customer'}).intercept((err) => {
+      return err;
+    });
+
+    if (user) {
+      const config = _.head(await Config.find().limit(1)
+      .intercept((err) => {
+        return err;
+      }));
+
+      const transporter = nodemailer.createTransport({
+        host: 'smtp.ebuyexchange.com',
+        port: 587,
+        secure: false,
+        tls: {
+          // do not fail on invalid certs
+          rejectUnauthorized: false
+        },
+        auth: {user: config.emailAddress, pass: config.emailPwd},
+      });
+      
+      transporter.sendMail({
+        from: config.emailAddress, // sender address
+        to: user.email, // list of receivers
+        subject: 'eBUYexchange: Forgot Password', // Subject line
+        html: `
+          <div>Hi ${user.firstName} ${user.lastName},</div>
+          <br />
+          <div>Kindly click on the given link to reset your password: <a href="${sails.config.globals.siteURL}?forgotPwdHash=${forgotPwdHash}&id=${user.id}">Reset Password.</a></div>
+          <br />
+          <div>Thank you.</div>
+          `,
+      }, (err, info) => {
+        if (err)
+          sails.log(err)
+        else
+          sails.log(info);
+      });
+
+      await User.update({email: params.email, isArchived: false, isEmailVerified: true, role: '__customer'}, {
+        forgotPwdHash,
+      }).intercept((err) => {
+        return err;
+      });
+
+      return res.status(200).json({details: "We have sent you a link, kindly check your email for resetting your password."});
+    }
+
+    return res.status(400).json({details: "User with this email address does not exist."});
+
+  },
+
+  resetPassword: async (req, res) => {
+    /**
+     * Params:
+     * - newPwd (req)
+     * - forgotPwdHash (req)
+     * - id (query param, req)
+    */
+
+    sails.log('UsersController:: resetPassword called');
+
+    const params = req.allParams();
+
+    //  Feilds Pattern Validation
+    if (!params.forgotPwdHash || !params.newPwd) {
+      return res.json(400, {details: 'Invalid arguments provided.'});
+    } 
+
+    const user = await User.findOne({id: params.id, isArchived: false, isEmailVerified: true, role: '__customer'}).intercept((err) => {
+      return err;
+    });
+
+    if (user.forgotPwdHash === params.forgotPwdHash) {
+      const passwordHash = await bcrypt.hash(params.newPwd, 10);
+
+      await User.update({id: params.id, isArchived: false, isEmailVerified: true, role: '__customer'}, {
+        forgotPwdHash: '',
+        password: passwordHash,
+      }).intercept((err) => {
+        return err;
+      }).fetch();
+
+      return res.status(200).json({details: "Password successfully reset, kindly login."});
+    }
+
+    return res.status(400).json({details: "Invalid arguments provided, password can not be reset."});
   },
 };

@@ -35,6 +35,8 @@ module.exports.policies = {
 
     verifyEmail: true,
     registerUser: true,
+    forgotPwd: true,
+    resetPassword: true,
     editProfile: 'isAuthenticated',
     changePassword: 'isAuthenticated',
   },
