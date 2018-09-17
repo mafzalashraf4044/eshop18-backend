@@ -42,7 +42,7 @@ module.exports.policies = {
   },
 
   AccountController: {
-    getAccounts: 'isAuthenticated',
+    getAccounts: 'isAdmin',
     createAccount: 'isAdmin',
     updateAccount: 'isAdmin',
     deleteAccount: 'isAdmin',

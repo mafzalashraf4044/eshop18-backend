@@ -198,10 +198,10 @@ module.exports = {
     const accountModel = params.accountType === 'paymentmethod' ? {paymentMethod: params.paymentMethod} : {eCurrency: params.eCurrency};
 
     if (['paymentmethod', 'ecurrency'].indexOf(params.accountType) === -1) {
-      return res.status(400).json({details: 'Invalid parameters.'});
+      return res.status(400).json({details: 'Invalid arguments provide.'});
     }
 
-    const accounts = await Account.find({isArchived: false, ...accountModel})
+    const accounts = await Account.find({owner: req.user.id, isArchived: false, ...accountModel})
     .intercept((err) => {
       return err;
     });
@@ -249,7 +249,7 @@ module.exports = {
     const criteria = {id: params.id, isArchived: false};
 
     if (params.accountType || params.eCurrency || params.paymentMethod || params.owner) {
-      return res.status(400).json({details: 'Invalid parameters.'});
+      return res.status(400).json({details: 'Invalid arguments provide.'});
     }
 
     let account = await Account.update(criteria, params).intercept((err) => {
@@ -276,7 +276,7 @@ module.exports = {
 
     const params = req.allParams();
 
-    const account = await Account.update({id: params.id, isArchived: false}, {
+    const account = await Account.update({id: params.id, owner: req.user.id, isArchived: false}, {
       isArchived: true,
     }).intercept((err) => {
       return err;

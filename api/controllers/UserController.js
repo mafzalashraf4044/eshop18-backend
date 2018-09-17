@@ -26,11 +26,11 @@ module.exports = {
     const params = req.allParams();
     
     const criteria = {where: {isArchived: false, role: '__customer'}};
-    const fields = ['firstName', 'lastName', 'email', 'username', 'country', 'contactNumber'];
+    const fields = ['_id', 'firstName', 'lastName', 'email', 'username', 'country', 'contactNumber'];
 
     //  search query
     if (params.searchTerm) {
-      criteria.where.or = _.map(fields, (field) => ({[field]: {contains: params.searchTerm}}));
+      criteria.where.or = _.map(fields, (field) => ({[field]: field === '_id' ? params.searchTerm : {contains: params.searchTerm}}));
     }
 
     //  pagination
@@ -211,23 +211,25 @@ module.exports = {
       });
     } 
 
-    const user = await User.findOne({id: params.id}).intercept((err) => {
+    const user = await User.findOne({id: params.id, isArchived: false}).intercept((err) => {
       return err;
     });
 
-    if (user.isEmailVerified) {
-      return res.status(200).json({details: "This email is already verified, kindly enter you credentials to login."});
-    }
-
-    if (user.emailVerifyHash === params.emailVerifyHash) {
-      await User.update({id: params.id, isArchived: false, role: '__customer'}, {
-        emailVerifyHash: '',
-        isEmailVerified: true,
-      }).intercept((err) => {
-        return err;
-      });
-
-      return res.status(200).json({details: "Email verified successfully, enter your credentials to login."});
+    if (user) {
+      if (user.isEmailVerified) {
+        return res.status(200).json({details: "This email is already verified, kindly enter you credentials to login."});
+      }
+  
+      if (user.emailVerifyHash === params.emailVerifyHash) {
+        await User.update({id: params.id, isArchived: false, role: '__customer'}, {
+          emailVerifyHash: '',
+          isEmailVerified: true,
+        }).intercept((err) => {
+          return err;
+        });
+  
+        return res.status(200).json({details: "Email verified successfully, enter your credentials to login."});
+      }
     }
 
     return res.status(400).json({details: "User email can not be verfied."});
@@ -267,7 +269,7 @@ module.exports = {
     });
 
     const mailOptions = {
-      from: 'support@ebuyexchange.com', // sender address
+      from: `eBUYexchange <${config.emailAddress}>`, // sender address
       to: params.emails, // list of receivers
       subject: params.subject, // Subject line
       html: params.content,
@@ -294,12 +296,12 @@ module.exports = {
 
    const params = req.allParams();
    
-   const orders = await Order.find({user: params.id})
+   const orders = await Order.find({where: {user: params.id, isArchived: false}, sort: 'createdAt DESC'})
    .intercept((err) => {
     return err;
    });
 
-   const accounts = await Account.find({owner: params.id})
+   const accounts = await Account.find({where: {owner: params.id, isArchived: false}, sort: 'createdAt DESC'})
    .populate('eCurrency')
    .populate('paymentMethod')
    .intercept((err) => {
@@ -381,7 +383,7 @@ module.exports = {
     });
     
     transporter.sendMail({
-      from: config.emailAddress, // sender address
+      from: `eBUYexchange <${config.emailAddress}>`, // sender address
       to: user.email, // list of receivers
       subject: 'eBUYexchange: Verify Your Account', // Subject line
       html: `
@@ -554,7 +556,7 @@ module.exports = {
       });
       
       transporter.sendMail({
-        from: config.emailAddress, // sender address
+        from: `eBUYexchange <${config.emailAddress}>`, // sender address
         to: user.email, // list of receivers
         subject: 'eBUYexchange: Forgot Password', // Subject line
         html: `

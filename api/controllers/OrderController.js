@@ -19,7 +19,6 @@ module.exports = {
     * - pageSize
     * - user
     * - type
-    * - type
     */
 
     sails.log('OrderController::getOrders called');
@@ -27,7 +26,7 @@ module.exports = {
     const params = req.allParams();
     
     const criteria = {where: {isArchived: false, type: params.type}};
-    const fields = ['_id' ,'country', 'sentFrom', 'receivedIn', 'status', 'firstAmount', 'secondAmount'];
+    const fields = ['_id', 'status'];
 
     //  search query
     if (params.searchTerm) {
@@ -187,10 +186,10 @@ module.exports = {
     const params = req.allParams();
 
     if (['buy', 'sell', 'exchange'].indexOf(params.type) === -1 || !params.firstAmount || !params.from || !params.to) {
-      return res.status(400).json({details: 'Provided parameters are invaid.'});     
+      return res.status(400).json({details: 'Invalid arguments provided.'});     
     }
 
-    const eCurrency = await Ecurrency.findOne({title: params.type === 'buy' ? params.to : params.from})
+    const eCurrency = await Ecurrency.findOne({title: params.type === 'buy' ? params.to : params.from, isArchived: false})
     .intercept((err) => {
       return err;
     });
@@ -206,7 +205,7 @@ module.exports = {
       return res.status(200).json({serviceCharges, secondAmount: secondAmount.toFixed(2)});
     }
     
-    return res.status(400).json({details: 'Provided parameters are invaid.'});      
+    return res.status(400).json({details: 'Invalid arguments provided.'});      
   },
 
   placeOrder: async (req, res) => {
@@ -223,7 +222,7 @@ module.exports = {
     const params = req.allParams();
 
     if (['buy', 'sell', 'exchange'].indexOf(params.type) === -1 || !params.firstAmount || !params.from || !params.to) {
-      return res.status(400).json({details: 'Provided parameters are invaid.'});     
+      return res.status(400).json({details: 'Invalid arguments provided.'});     
     }
 
     const eCurrency = await Ecurrency.findOne({title: params.type === 'buy' ? params.to : params.from, isArchived: false})
@@ -431,9 +430,9 @@ module.exports = {
           ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Last Name:</b> ${toAccount.lastName}</div>`: ''}
           ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>City, State, Country, Post Code:</b> ${toAccount.details}</div>`: ''}
 
-          ${order.type === 'exchange' ? `<div><b>Receivable Amount:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
+          ${order.type === 'exchange' ? `<div><b>Receivable Amount:</b> USD ${parseFloat(order.secondAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
           ${order.type === 'exchange' ? `<div><b>Exchange Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
-          ${order.type === 'exchange' ? `<div><b>Have to send:</b> USD ${parseFloat(order.secondAmount).toFixed(2)} (${order.sentFrom.title})</div>`: ''}
+          ${order.type === 'exchange' ? `<div><b>Have to send:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.sentFrom.title})</div>`: ''}
           ${order.type === 'exchange' ? `<div><b>Delivery to:</b> ${toAccount.accountNum} (${toAccount.accountName})</div>`: ''}
 
           <br />
@@ -452,7 +451,7 @@ module.exports = {
       });
 
       transporter.sendMail({
-        from: config.emailAddress, // sender address
+        from: `eBUYexchange <${config.emailAddress}>`, // sender address
         to: config.emailAddress, // list of receivers
         subject: 'eBUYexchange: New Order Placed', // Subject line
         html: `
@@ -485,9 +484,9 @@ module.exports = {
           ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>Last Name:</b> ${toAccount.lastName}</div>`: ''}
           ${(order.type === 'sell' && !toAccount.paymentMethod.isBankingEnabled) ? `<div><b>City, State, Country, Post Code:</b> ${toAccount.details}</div>`: ''}
 
-          ${order.type === 'exchange' ? `<div><b>Receivable Amount:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
+          ${order.type === 'exchange' ? `<div><b>Receivable Amount:</b> USD ${parseFloat(order.secondAmount).toFixed(2)} (${order.receivedIn.title})</div>`: ''}
           ${order.type === 'exchange' ? `<div><b>Exchange Charges:</b> USD ${parseFloat(commissionAmount).toFixed(2)}</div>`: ''}
-          ${order.type === 'exchange' ? `<div><b>Have to send:</b> USD ${parseFloat(order.secondAmount).toFixed(2)} (${order.sentFrom.title})</div>`: ''}
+          ${order.type === 'exchange' ? `<div><b>Have to send:</b> USD ${parseFloat(order.firstAmount).toFixed(2)} (${order.sentFrom.title})</div>`: ''}
           ${order.type === 'exchange' ? `<div><b>Delivery to:</b> ${toAccount.accountNum} (${toAccount.accountName})</div>`: ''}
 
           <br />
@@ -503,7 +502,7 @@ module.exports = {
       return res.status(200).json({order});
     }
     
-    return res.status(400).json({details: 'Provided parameters are invaid.'}); 
+    return res.status(400).json({details: 'Invalid arguments provided.'}); 
   },
 
   getUserOrders: async (req, res) => {
@@ -512,6 +511,11 @@ module.exports = {
     const params = req.allParams();
     
     const criteria = {where: {isArchived: false, user: req.user.id}};
+
+    //  sorting
+    if ((params.sortType === 'ASC' || params.sortType === 'DESC') && params.sortBy) {
+      criteria.sort = `${params.sortBy} ${params.sortType}`;
+    }
 
     let orders = await Order.find(criteria).intercept((err) => {
       return err;
