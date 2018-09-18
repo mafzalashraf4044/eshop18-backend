@@ -324,6 +324,7 @@ module.exports = {
     */
 
     sails.log('UsersController:: registerUser called');
+    sails.log('req.connection.remoteAddress', req.connection.remoteAddress);
 
     const params = req.allParams();
     
