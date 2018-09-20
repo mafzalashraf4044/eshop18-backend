@@ -324,7 +324,7 @@ module.exports = {
     */
 
     sails.log('UsersController:: registerUser called');
-    sails.log('req.connection.remoteAddress', req.connection.remoteAddress);
+    sails.log('req.connection.remoteAddress', req.connection.remoteAddress.slice(7));
 
     const params = req.allParams();
     
@@ -414,7 +414,7 @@ module.exports = {
         <div><b>First Name:</b> ${user.firstName}</div>
         <div><b>Last Name:</b> ${user.lastName}</div>
         <div><b>Email:</b> ${user.email}</div>
-        <div><b>IP:</b> ${req.connection.remoteAddress}</div>
+        <div><b>IP:</b> ${req.connection.remoteAddress.slice(7)}</div>
         <div><b>Username:</b> ${user.username}</div>
         <div><b>Country:</b> ${user.country}</div>
         <div><b>Contact Number:</b> ${user.contactNumber}</div>
@@ -513,6 +513,39 @@ module.exports = {
 
 
     return res.status(200).json({user});
+  },
+
+  changePasswordAdmin: async (req, res) => {
+    /**
+     * Params:
+     * - oldPwd (req)
+     * - newPwd (req)
+     * - id (query param, req)
+    */
+
+    sails.log('UsersController:: changePasswordAdmin called');
+
+    const params = req.allParams();
+
+    //  Feilds Pattern Validation
+    if (!params.newPwd) {
+      return res.json(400, {details: 'Invalid arguments provided.'});
+    } 
+
+    let user = await User.findOne({id: params.id, isArchived: false, role: '__admin'})
+    .intercept((err) => {
+      return err;
+    });
+
+    const passwordHash = await bcrypt.hash(params.newPwd, 10);
+
+    user = await User.update({id: params.id, isArchived: false}, {
+      password: passwordHash,
+    }).intercept((err) => {
+      return err;
+    }).fetch();
+
+    return res.json(200, {user: _.head(user)});    
   },
 
   forgotPwd: async (req, res) => {

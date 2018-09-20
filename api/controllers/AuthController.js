@@ -24,7 +24,7 @@ module.exports = {
     }, (err, user, details) => {
 
       if (err || !user || (user && user.role === '__admin')) {
-        return res.status(403).json(details);
+        return res.status(403).json({details: 'Invalid credentials.'});
       }
 
       req.login(user, {

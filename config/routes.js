@@ -52,6 +52,7 @@ module.exports.routes = {
   'POST /verify-email/:id': 'UserController.verifyEmail',
   'POST /send-email-to-list': 'UserController.sendEmailToList',
   'GET /get-user-orders-and-accounts/:id': 'UserController.getUserOrdersAndAccounts',
+  'POST /change-password-admin/:id': 'UserController.changePasswordAdmin',
   'POST /register-user': 'UserController.registerUser',
   'PATCH /edit-profile/:id': 'UserController.editProfile',
   'POST /change-password/:id': 'UserController.changePassword',

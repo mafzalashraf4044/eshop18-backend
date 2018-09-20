@@ -32,6 +32,7 @@ module.exports.policies = {
     updateVerfiedStatus: 'isAdmin',
     sendEmailToList: 'isAdmin',
     getUserOrdersAndAccounts: 'isAdmin',
+    changePasswordAdmin: 'isAdmin',
 
     verifyEmail: true,
     registerUser: true,
