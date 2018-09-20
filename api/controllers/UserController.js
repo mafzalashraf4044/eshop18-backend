@@ -232,7 +232,7 @@ module.exports = {
       }
     }
 
-    return res.status(400).json({details: "User email can not be verfied."});
+    return res.status(400).json({details: "Email can not be verified because the verification link you provided is invalid."});
 
   },
 
@@ -249,7 +249,7 @@ module.exports = {
     const params = req.allParams();
 
     if (_.isUndefined(params.subject) || _.isUndefined(params.content) || _.isUndefined(params.subject) || _.isUndefined(params.emails) || (params.email && params.email.length === 0)) {
-      return res.json(400, {details: 'Invalid arguments provided.'});
+      return res.json(400, {details: 'The parameters you entered are invalid, please try again.'});
     }
 
     const config = _.head(await Config.find().limit(1)
@@ -324,7 +324,6 @@ module.exports = {
     */
 
     sails.log('UsersController:: registerUser called');
-    sails.log('req.connection.remoteAddress', req.connection.remoteAddress.slice(7));
 
     const params = req.allParams();
     
@@ -487,7 +486,7 @@ module.exports = {
 
     //  Feilds Pattern Validation
     if (!params.oldPwd || !params.newPwd) {
-      return res.json(400, {details: 'Invalid arguments provided.'});
+      return res.json(400, {details: 'The parameters you entered are invalid, please try again.'});
     } 
 
     let user = await User.findOne({id: params.id, isArchived: false, role: '__customer'})
@@ -529,7 +528,7 @@ module.exports = {
 
     //  Feilds Pattern Validation
     if (!params.newPwd) {
-      return res.json(400, {details: 'Invalid arguments provided.'});
+      return res.json(400, {details: 'The parameters you entered are invalid, please try again.'});
     } 
 
     let user = await User.findOne({id: params.id, isArchived: false, role: '__admin'})
@@ -634,7 +633,7 @@ module.exports = {
 
     //  Feilds Pattern Validation
     if (!params.forgotPwdHash || !params.newPwd) {
-      return res.json(400, {details: 'Invalid arguments provided.'});
+      return res.json(400, {details: 'The parameters you entered are invalid, please try again.'});
     } 
 
     const user = await User.findOne({id: params.id, isArchived: false, isEmailVerified: true, role: '__customer'}).intercept((err) => {
@@ -654,6 +653,6 @@ module.exports = {
       return res.status(200).json({details: "Password successfully reset, kindly login."});
     }
 
-    return res.status(400).json({details: "Invalid arguments provided, password can not be reset."});
+    return res.status(400).json({details: "The parameters you entered are invalid, please try again, password can not be reset."});
   },
 };

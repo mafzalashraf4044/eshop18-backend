@@ -195,10 +195,15 @@ module.exports = {
     sails.log('AccountController:: createUserAccount called');
 
     const params = req.allParams();
+
+    if (!params.paymentMethod && !params.eCurrency) {
+      return res.status(400).json({details: 'The parameters you entered are invalid, please try again.'});      
+    }
+
     const accountModel = params.accountType === 'paymentmethod' ? {paymentMethod: params.paymentMethod} : {eCurrency: params.eCurrency};
 
     if (['paymentmethod', 'ecurrency'].indexOf(params.accountType) === -1) {
-      return res.status(400).json({details: 'Invalid arguments provide.'});
+      return res.status(400).json({details: 'The parameters you entered are invalid, please try again.'});
     }
 
     const accounts = await Account.find({owner: req.user.id, isArchived: false, ...accountModel})
@@ -249,7 +254,7 @@ module.exports = {
     const criteria = {id: params.id, isArchived: false};
 
     if (params.accountType || params.eCurrency || params.paymentMethod || params.owner) {
-      return res.status(400).json({details: 'Invalid arguments provide.'});
+      return res.status(400).json({details: 'The parameters you entered are invalid, please try again.'});
     }
 
     let account = await Account.update(criteria, params).intercept((err) => {

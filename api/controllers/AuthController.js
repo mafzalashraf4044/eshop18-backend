@@ -16,7 +16,7 @@ module.exports = {
     const params = req.allParams();
     
     if (!params.email || !params.password) {
-      return res.json(400, {details: 'Invalid credentials.'});
+      return res.json(400, {details: 'The email or password you entered is wrong, please try again.'});
     }
 
     passport.authenticate('local', {
@@ -24,7 +24,7 @@ module.exports = {
     }, (err, user, details) => {
 
       if (err || !user || (user && user.role === '__admin')) {
-        return res.status(403).json({details: 'Invalid credentials.'});
+        return res.status(403).json({details: 'The email or password you entered is wrong, please try again.'});
       }
 
       req.login(user, {
@@ -79,40 +79,5 @@ module.exports = {
     })(req, res);
   }
 
-  // login: async (req, res) => {
-  //   /**
-  //   * Params:
-  //   * - email
-  //   * - username
-  //   * - password
-  //   */
-
-  //   sails.log('UsersController::login called');
-
-  //   const params = req.allParams();  
-    
-  //   if (!(params.email || params.username) && !params.password) {
-  //     return res.status(400).json({msg: 'Invalid credentials1.'});
-  //   }
-
-  //   const user = _.head(await User.find({
-  //     or : [
-  //       { email: params.email },
-  //       { username: params.username },
-  //     ],
-  //   }));
-
-  //   sails.log('req.session.user', req.session.user);
-
-  //   const isMatched = await bcrypt.compare(params.password, user.password);
-
-  //   if (isMatched) {
-  //     req.session.user = user;
-  //     return res.status(200).json({msg: 'Login successful.', user});
-  //   } else {
-  //     return res.status(400).json({msg: 'Invalid credentials2.'});
-  //   }
-
-  // }, 
 };
 

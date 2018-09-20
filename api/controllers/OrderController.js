@@ -186,7 +186,7 @@ module.exports = {
     const params = req.allParams();
 
     if (['buy', 'sell', 'exchange'].indexOf(params.type) === -1 || !params.firstAmount || !params.from || !params.to) {
-      return res.status(400).json({details: 'Invalid arguments provided.'});     
+      return res.status(400).json({details: 'The parameters you entered are invalid, please try again.'});     
     }
 
     const eCurrency = await Ecurrency.findOne({title: params.type === 'buy' ? params.to : params.from, isArchived: false})
@@ -205,7 +205,7 @@ module.exports = {
       return res.status(200).json({serviceCharges, secondAmount: secondAmount.toFixed(2)});
     }
     
-    return res.status(400).json({details: 'Invalid arguments provided.'});      
+    return res.status(400).json({details: 'The parameters you entered are invalid, please try again.'});      
   },
 
   placeOrder: async (req, res) => {
@@ -222,7 +222,7 @@ module.exports = {
     const params = req.allParams();
 
     if (['buy', 'sell', 'exchange'].indexOf(params.type) === -1 || !params.firstAmount || !params.from || !params.to) {
-      return res.status(400).json({details: 'Invalid arguments provided.'});     
+      return res.status(400).json({details: 'The parameters you entered are invalid, please try again.'});     
     }
 
     const eCurrency = await Ecurrency.findOne({title: params.type === 'buy' ? params.to : params.from, isArchived: false})
@@ -502,7 +502,7 @@ module.exports = {
       return res.status(200).json({order});
     }
     
-    return res.status(400).json({details: 'Invalid arguments provided.'}); 
+    return res.status(400).json({details: 'The parameters you entered are invalid, please try again.'}); 
   },
 
   getUserOrders: async (req, res) => {

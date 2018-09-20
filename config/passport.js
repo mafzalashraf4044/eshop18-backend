@@ -7,7 +7,7 @@ passport.use(new LocalStrategy({usernameField: 'email', passwordField: 'password
   const user = _.head(await User.find({email}));
 
   if (!user) {
-    return proceed(null, null, {details: 'Invalid credentials.'});
+    return proceed(null, null, {details: 'The email or password you entered is wrong, please try again.'});
   } else {
     const isPwdMatched = await bcrypt.compare(password, user.password);
     
@@ -18,7 +18,7 @@ passport.use(new LocalStrategy({usernameField: 'email', passwordField: 'password
         return proceed(null, user, {details: 'Login Successful.'}); 
       }
     } else {
-      return proceed(null, null, {details: 'Invalid credentials.'});
+      return proceed(null, null, {details: 'The email or password you entered is wrong, please try again.'});
     }
   }
 }));

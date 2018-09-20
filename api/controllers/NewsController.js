@@ -71,7 +71,7 @@ module.exports = {
     const params = req.allParams();
 
     if (!params.title || !params.content) {
-      return res.json(400, {details: 'Invalid arguments provided.'});
+      return res.json(400, {details: 'The parameters you entered are invalid, please try again.'});
     }
 
     const news = await News.create(params)
