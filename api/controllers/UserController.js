@@ -77,14 +77,8 @@ module.exports = {
      */
 
     //  Feilds Pattern Validation
-    if (params.firstName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.firstName)) {
-      return res.json(400, {details: 'First name is invalid.'});
-    } else if (params.lastName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.lastName)) {
-      return res.json(400, {details: 'Last name is invalid.'});
-    } else if (params.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email)) {
+    if (params.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email)) {
       return res.json(400, {details: 'Email is invalid.'});
-    } else if (params.username && !/^[a-zA-Z0-9][a-zA-Z0-9]+[a-zA-Z0-9]$/.test(params.username)) {
-      return res.json(400, {details: 'Username is invalid.'});
     }
 
     const user = await User.create({
@@ -122,12 +116,8 @@ module.exports = {
     const params = req.allParams();
 
     //  Feilds Pattern Validation
-    if (params.firstName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.firstName)) {
-      return res.json(400, {details: 'First name is invalid.'});
-    } else if (params.lastName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.lastName)) {
-      return res.json(400, {details: 'Last name is invalid.'});
-    } else if (params.username && !/^[a-zA-Z0-9][a-zA-Z0-9]+[a-zA-Z0-9]$/.test(params.username)) {
-      return res.json(400, {details: 'Username is invalid.'});
+    if (params.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email)) {
+      return res.json(400, {details: 'Email is invalid.'});
     }
 
     const user = await User.update({id: params.id, isArchived: false}, {
@@ -268,18 +258,18 @@ module.exports = {
       auth: {user: config.emailAddress, pass: config.emailPwd},
     });
 
-    const mailOptions = {
-      from: `eBUYexchange <${config.emailAddress}>`, // sender address
-      to: params.emails, // list of receivers
-      subject: params.subject, // Subject line
-      html: params.content,
-    };
-
-    transporter.sendMail(mailOptions, function (err, info) {
-      if(err)
-        sails.log(err)
-      else
-        sails.log(info);
+    params.emails.forEach(email => {
+      transporter.sendMail({
+        from: `eBUYexchange <${config.emailAddress}>`, // sender address
+        to: email, // list of receivers
+        subject: params.subject, // Subject line
+        html: params.content,
+      }, function (err, info) {
+        if(err)
+          sails.log(err)
+        else
+          sails.log(info);
+      });
     });
 
     return res.status(200).json({details: "Email sent successfully."});
@@ -334,16 +324,8 @@ module.exports = {
      */
 
     //  Feilds Pattern Validation
-    if (params.firstName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.firstName)) {
-      return res.json(400, {details: 'First name is invalid.'});
-    } else if (params.lastName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.lastName)) {
-      return res.json(400, {details: 'Last name is invalid.'});
-    } else if (params.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email)) {
+    if (params.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email)) {
       return res.json(400, {details: 'Email is invalid.'});
-    } else if (params.username && !/^[a-zA-Z0-9][a-zA-Z0-9]+[a-zA-Z0-9]$/.test(params.username)) {
-      return res.json(400, {details: 'Username is invalid.'});
-    } else if (params.password && params.password.length < 8) {
-      return res.json(400, {details: 'Password must be atleast 8 charachters long.'});
     }
 
     const current_date = (new Date()).valueOf().toString();
@@ -448,15 +430,6 @@ module.exports = {
 
     const params = req.allParams();
 
-    //  Feilds Pattern Validation
-    if (params.firstName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.firstName)) {
-      return res.json(400, {details: 'First name is invalid.'});
-    } else if (params.lastName && !/^[a-zA-Z][a-zA-Z]+[a-zA-Z]$/.test(params.lastName)) {
-      return res.json(400, {details: 'Last name is invalid.'});
-    } else if (params.username && !/^[a-zA-Z0-9][a-zA-Z0-9]+[a-zA-Z0-9]$/.test(params.username)) {
-      return res.json(400, {details: 'Username is invalid.'});
-    }
-
     const user = await User.update({id: params.id, isArchived: false}, {
       firstName: params.firstName,
       lastName: params.lastName,
@@ -487,7 +460,9 @@ module.exports = {
     //  Feilds Pattern Validation
     if (!params.oldPwd || !params.newPwd) {
       return res.json(400, {details: 'The parameters you entered are invalid, please try again.'});
-    } 
+    } else if (params.newPwd.length < 8) {
+      return res.json(400, {details: 'Password must be atleast 8 charachters long.'});
+    }
 
     let user = await User.findOne({id: params.id, isArchived: false, role: '__customer'})
     .intercept((err) => {
@@ -634,11 +609,17 @@ module.exports = {
     //  Feilds Pattern Validation
     if (!params.forgotPwdHash || !params.newPwd) {
       return res.json(400, {details: 'The parameters you entered are invalid, please try again.'});
-    } 
+    } else if (params.newPwd.length < 8) {
+      return res.json(400, {details: 'Password must be atleast 8 charachters long.'});
+    }
 
     const user = await User.findOne({id: params.id, isArchived: false, isEmailVerified: true, role: '__customer'}).intercept((err) => {
       return err;
     });
+
+    if (!user.forgotPwdHash) {
+      return res.status(400).json({details: "This reset password link has been expired, please try again using forgot password option."}); 
+    }
 
     if (user.forgotPwdHash === params.forgotPwdHash) {
       const passwordHash = await bcrypt.hash(params.newPwd, 10);
