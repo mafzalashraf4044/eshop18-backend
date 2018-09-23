@@ -384,7 +384,7 @@ module.exports = {
       }));
       
       const transporter = nodemailer.createTransport({
-        host: 'smtp.ebuyexchange.com',
+        host: 'smtp.eshop18.com',
         port: 587,
         secure: false,
         tls: {
@@ -396,13 +396,13 @@ module.exports = {
       
       const createdAt = new Date(order.createdAt);
       transporter.sendMail({
-        from: `eBUYexchange <${config.emailAddress}>`, // sender address
+        from: `eshop18 <${config.emailAddress}>`, // sender address
         to: req.user.email, // list of receivers
-        subject: 'eBUYexchange: Order Placed Successfully', // Subject line
+        subject: 'eshop18: Order Placed Successfully', // Subject line
         html: `
           <div>Dear ${req.user.firstName} ${req.user.lastName},</div>
           <br />
-          <div>Thank you for placing order at www.ebuyexchange.com, your order details are as follows:</div>
+          <div>Thank you for placing order at www.eshop18.com, your order details are as follows:</div>
           <br />
           <div><b>Order No:</b> ${order.id}</div>
           <div><b>Email:</b> ${req.user.email}</div>
@@ -451,9 +451,9 @@ module.exports = {
       });
 
       transporter.sendMail({
-        from: `eBUYexchange <${config.emailAddress}>`, // sender address
+        from: `eshop18 <${config.emailAddress}>`, // sender address
         to: config.emailAddress, // list of receivers
-        subject: 'eBUYexchange: New Order Placed', // Subject line
+        subject: 'eshop18: New Order Placed', // Subject line
         html: `
           <div>Hi Admin,</div>
           <br />

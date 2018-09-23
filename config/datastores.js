@@ -49,7 +49,7 @@ module.exports.datastores = {
     *                                                                          *
     ***************************************************************************/
     adapter: 'sails-mongo',
-    url: 'mongodb://localhost:27017/ebuyexchange-db',
+    url: 'mongodb://localhost:27017/eshop18-db',
   },
 
 

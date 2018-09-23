@@ -1,4 +1,4 @@
-# ebuyexchange
+# eshop18
 
 a [Sails v1](https://sailsjs.com) application
 

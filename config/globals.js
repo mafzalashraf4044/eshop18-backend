@@ -11,8 +11,8 @@
 
 module.exports.globals = {
 
-  siteURL: 'http://ebuyexchange.com', 
-  adminURL: 'http://ebuyexchange.com/admin', 
+  siteURL: 'http://eshop18.com', 
+  adminURL: 'http://eshop18.com/admin', 
 
   /****************************************************************************
   *                                                                           *
